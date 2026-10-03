@@ -57,13 +57,14 @@ constexpr Svc::TlmPacketizerChannelEntry HealthAuxillaryChannels[] = {
 static_assert(PACKET_HEADER_SIZE + 77 <= FW_COM_BUFFER_MAX_SIZE, "Packet HealthAuxillary exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket HealthAuxillary = {HealthAuxillaryChannels, 0x3, 2, FW_NUM_ARRAY_ELEMENTS(HealthAuxillaryChannels)};
 
-// Packet Version: id 0x4, group 3, 144 data bytes
+// Packet Version: id 0x4, group 3, 192 data bytes
 constexpr Svc::TlmPacketizerChannelEntry VersionChannels[] = {
     {0x01003000, 48},  // CdhCore.version.FrameworkVersion
     {0x01003001, 48},  // CdhCore.version.ProjectVersion
     {0x0100300c, 48},  // CdhCore.version.LibraryVersion01
+    {0x0100300d, 48},  // CdhCore.version.LibraryVersion02
 };
-static_assert(PACKET_HEADER_SIZE + 144 <= FW_COM_BUFFER_MAX_SIZE, "Packet Version exceeds FW_COM_BUFFER_MAX_SIZE");
+static_assert(PACKET_HEADER_SIZE + 192 <= FW_COM_BUFFER_MAX_SIZE, "Packet Version exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket Version = {VersionChannels, 0x4, 3, FW_NUM_ARRAY_ELEMENTS(VersionChannels)};
 
 // Packet DoomEngine: id 0x100, group 1, 37 data bytes

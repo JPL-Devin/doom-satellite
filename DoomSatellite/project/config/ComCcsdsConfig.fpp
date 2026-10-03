@@ -3,7 +3,7 @@ module ComCcsdsConfig {
     constant BASE_ID = 0x02000000
     
     module QueueSizes {
-        constant comQueue    = 80 # Holds a full TlmPacketizer Run burst (one packet per DOOM frame row)
+        constant comQueue    = 10 # comQueue preempts the rate groups, so each packet is moved to its internal queue on arrival
         constant aggregator  = 5
     }
     
@@ -13,7 +13,7 @@ module ComCcsdsConfig {
     }
 
     module Priorities {
-        constant comQueue   = 5
+        constant comQueue   = 2 # Above the rate groups (3, 4): a TlmPacketizer Run burst lands in the QueueDepths.tlm queue
         constant aggregator = 4
     }
 
@@ -25,7 +25,7 @@ module ComCcsdsConfig {
     # Queue configuration constants
     module QueueDepths {
         constant events      = 20             
-        constant tlm         = 80           
+        constant tlm         = 80 # Holds a full TlmPacketizer Run burst (one packet per DOOM frame row)
         constant file        = 1            
     }
 

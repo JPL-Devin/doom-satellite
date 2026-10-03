@@ -36,13 +36,13 @@ telemetry packets DoomFlightPackets {
     CdhCore.version.FrameworkVersion
     CdhCore.version.ProjectVersion
     CdhCore.version.LibraryVersion01
+    CdhCore.version.LibraryVersion02
   }
 
 
 } omit {
   CdhCore.cmdDisp.CommandErrors
   # Only has one library, no custom versions
-  CdhCore.version.LibraryVersion02
   CdhCore.version.LibraryVersion03
   CdhCore.version.LibraryVersion04
   CdhCore.version.LibraryVersion05

@@ -22,6 +22,7 @@
 // Include autocoded FPP constants
 #include <zephyr/drivers/uart.h>
 #include "DoomSatellite/DoomFlight/Top/FppConstantsAc.hpp"
+#include "DoomSatellite/DoomFlight/Top/DoomSatelliteMergedPackets.hpp"
 
 /**
  * \brief required ping constants
