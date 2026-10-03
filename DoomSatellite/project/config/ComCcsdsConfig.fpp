@@ -3,7 +3,7 @@ module ComCcsdsConfig {
     constant BASE_ID = 0x02000000
     
     module QueueSizes {
-        constant comQueue    = 10
+        constant comQueue    = 80 # Holds a full TlmPacketizer Run burst (one packet per DOOM frame row)
         constant aggregator  = 5
     }
     
@@ -25,7 +25,7 @@ module ComCcsdsConfig {
     # Queue configuration constants
     module QueueDepths {
         constant events      = 20             
-        constant tlm         = 20           
+        constant tlm         = 80           
         constant file        = 1            
     }
 

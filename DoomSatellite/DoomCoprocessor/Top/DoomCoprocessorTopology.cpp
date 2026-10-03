@@ -6,18 +6,16 @@
 #include <DoomSatellite/DoomCoprocessor/Top/DoomCoprocessorTopology.hpp>
 #include <DoomSatellite/DoomCoprocessor/Top/DoomCoprocessorTopologyAc.hpp>
 
+#include <Fw/Logger/Logger.hpp>
 #include <Fw/Types/MallocAllocator.hpp>
 #include <Os/Task.hpp>
 
-#include <atomic>
 #include <cstring>
 
 // Allows easy reference to objects in FPP/autocoder required namespaces
 using namespace DoomCoprocessor;
 
 namespace {
-std::atomic<bool> g_running(true);
-constexpr FwSizeType RUN_POLL_MS = 100;
 Fw::MallocAllocator mallocator;
 
 enum TopologyConstants {
@@ -28,7 +26,19 @@ enum TopologyConstants {
     HUB_RECONNECT_PRIORITY = 29,
 };
 
+const Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{
+    {{DOOM_RATE_DIVIDER, 0}, {HOUSEKEEPING_RATE_DIVIDER, 0}}};
+
+Svc::ActiveRateGroup::ContextArray rateGroupDoomContext(0U);
+Svc::ActiveRateGroup::ContextArray rateGroup1HzContext(0U);
+
 void configureTopology(const DoomCoprocessor::TopologyState& state) {
+    rateGroupDriver.configure(rateGroupDivisorsSet);
+    // DoomEngine reads the tick period from its schedIn context
+    rateGroupDoomContext[0] = DOOM_TICK_USEC;
+    rateGroupDoom.configure(rateGroupDoomContext);
+    rateGroup1Hz.configure(rateGroup1HzContext);
+
     Svc::BufferManager::BufferBins hubBins;
     memset(&hubBins, 0, sizeof(hubBins));
     hubBins.bins[0].bufferSize = HUB_BUFFER_SIZE;
@@ -37,6 +47,18 @@ void configureTopology(const DoomCoprocessor::TopologyState& state) {
 
     (void)hubComDriver.configureSend(state.hubRemoteAddress, state.hubRemotePort);
     (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort);
+
+    // All engine heap allocation happens here, before any task runs. An unreadable WAD leaves the engine uncreated
+    // and doom.Start is rejected.
+    Doom::InitStatus initStatus = DoomSubtopology::doom.setWadPath((state.wadPath != nullptr) ? state.wadPath : "");
+    if (initStatus == Doom::InitStatus::OK) {
+        initStatus = DoomSubtopology::doom.initEngine();
+    }
+    if (initStatus != Doom::InitStatus::OK) {
+        Fw::String text;
+        initStatus.toString(text);
+        Fw::Logger::log("DOOM engine init failed (%s): Start will be rejected\n", text.toChar());
+    }
 }
 }  // namespace
 
@@ -64,16 +86,20 @@ void setupTopology(const TopologyState& state) {
     Os::TaskString hubName("hub");
     hubComDriver.start(hubName, HUB_RECV_PRIORITY, Default::STACK_SIZE, Os::Task::TASK_DEFAULT, HUB_RECONNECT_PRIORITY,
                        Default::STACK_SIZE);
-}
 
-void runTopology() {
-    while (g_running.load()) {
-        Os::Task::delay(Fw::TimeInterval(0, RUN_POLL_MS * 1000));
+    if (state.autoStart) {
+        Fw::String status;
+        DoomSubtopology::doom.forceStart().toString(status);
+        Fw::Logger::log("Auto-start: doom.forceStart() returned %s\n", status.toChar());
     }
 }
 
+void runTopology() {
+    linuxTimer.startTimer(Fw::TimeInterval(0, BASE_TIMER_USEC));
+}
+
 void stopTopology() {
-    g_running.store(false);
+    linuxTimer.quit();
 }
 
 void teardownTopology(const TopologyState& state) {

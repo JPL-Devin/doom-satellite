@@ -11,7 +11,9 @@
 // Zephyr headers follow F Prime headers: Zephyr's EMPTY macro collides with Os::Queue::Status::EMPTY
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
+#if defined(CONFIG_RETENTION_BOOT_MODE)
 #include <zephyr/retention/bootmode.h>
+#endif
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/reboot.h>
 
@@ -27,7 +29,13 @@ class ParkingAssertHook : public Fw::AssertHook {
         while (true) {
             U32 baud = 0;
             if ((uart_line_ctrl_get(serial, UART_LINE_CTRL_BAUD_RATE, &baud) == 0) && (baud == 1200)) {
+#if defined(CONFIG_RETENTION_BOOT_MODE)
                 (void)bootmode_set(BOOT_MODE_TYPE_BOOTLOADER);
+#endif
+#if defined(CONFIG_BOARD_TEENSY41)
+                // Teensy bootloader chip halts the core on this breakpoint and enters HalfKay
+                __asm__ volatile("bkpt #251");
+#endif
                 sys_reboot(SYS_REBOOT_WARM);
             }
             k_sleep(K_MSEC(100));

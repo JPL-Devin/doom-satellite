@@ -1,6 +1,6 @@
-# West manifest for doom-satellite - RP2040 only
+# West manifest for doom-satellite: Adafruit Feather RP2040 and PJRC Teensy 4.1 (NXP i.MX RT1062)
 # This minimal manifest significantly reduces the download and setup time
-# by only including modules required for Raspberry Pi RP2040/RP2350 builds
+# by only including modules required for those boards
 
 manifest:
   defaults:
@@ -26,6 +26,7 @@ manifest:
           - cmsis      # ARM CMSIS support (required for Cortex-M)
           - cmsis_6    # ARM CMSIS 6 support (required for RPI)
           - hal_rpi_pico  # Raspberry Pi Pico HAL (REQUIRED for RP2040/RP2350)
+          - hal_nxp    # NXP HAL (REQUIRED for Teensy 4.x / i.MX RT1062)
           - picolibc   # C library
 
 
@@ -46,6 +47,12 @@ manifest:
     - name: hal_rpi_pico
       path: lib/zephyr-workspace/modules/hal/rpi_pico
       revision: 09e957522da60581cf7958b31f8e625d969c69a5
+      groups:
+        - hal
+
+    - name: hal_nxp
+      path: lib/zephyr-workspace/modules/hal/nxp
+      revision: 6d6ab91d5cc71c872353af1957d19f3d930df0fd
       groups:
         - hal
 

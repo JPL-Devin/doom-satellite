@@ -8,10 +8,11 @@ module DoomCoprocessor {
   #
   # Where:
   #   D   = Deployment digit (2 for this deployment)
-  #   SS  = Subtopology digits (00 for main topology)
+  #   SS  = Subtopology digits (00 for main topology, D0 for DoomSubtopology: DoomConfig.fpp BASE_ID 0x2D000000)
   #   CC  = Component digits (00, 01, 02, etc.)
   #   xxx = Reserved for internal component items (events, commands, telemetry)
   #
+  # Every id is >= 0x20000000 so DoomFlight's CmdSplitter forwards these opcodes across the hub.
 
   # ----------------------------------------------------------------------
   # Defaults
@@ -31,6 +32,18 @@ module DoomCoprocessor {
     stack size Default.STACK_SIZE \
     priority 35
 
+  @ 35 Hz: DOOM's native gameplay cadence, one doomgeneric tick per cycle
+  instance rateGroupDoom: Svc.ActiveRateGroup base id 0x20006000 \
+    queue size Default.QUEUE_SIZE \
+    stack size Default.STACK_SIZE \
+    priority 43
+
+  @ 1 Hz housekeeping
+  instance rateGroup1Hz: Svc.ActiveRateGroup base id 0x20007000 \
+    queue size Default.QUEUE_SIZE \
+    stack size Default.STACK_SIZE \
+    priority 41
+
   # ----------------------------------------------------------------------
   # Passive component instances
   # ----------------------------------------------------------------------
@@ -44,5 +57,11 @@ module DoomCoprocessor {
   instance hubByteStreamAdapter: Drv.ByteStreamBufferAdapter base id 0x20004000
 
   instance hubBufferManager: Svc.BufferManager base id 0x20005000
+
+  instance rateGroupDriver: Svc.RateGroupDriver base id 0x20008000
+
+  instance linuxTimer: Svc.LinuxTimer base id 0x20009000
+
+  instance tlmEcho: Components.TlmEchoReceiver base id 0x2000A000
 
 }

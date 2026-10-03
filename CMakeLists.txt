@@ -3,7 +3,7 @@
 # DoomSatellite/. It also imports the core F Prime components.
 #
 # Deployments:
-#   DoomFlight:      RP2040 (Zephyr) flight software. Built with the default 'zephyr' toolchain.
+#   DoomFlight:      Teensy 4.1 / RP2040 (Zephyr) flight software. Built with the default 'zephyr' toolchain.
 #   DoomCoprocessor: arm-linux coprocessor software. Built with the 'aarch64-linux' toolchain.
 ####
 cmake_minimum_required(VERSION 3.24.2)
@@ -28,4 +28,7 @@ if (FPRIME_PLATFORM STREQUAL "Zephyr")
     set_target_properties(Svc_FatalHandler PROPERTIES EXCLUDE_FROM_ALL TRUE)
     set_target_properties(fprime-zephyr_Drv_ZephyrSpiDriver PROPERTIES EXCLUDE_FROM_ALL TRUE)
     set_target_properties(Drv_TcpClient Drv_TcpServer PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    # fprime-stress runs on DoomCoprocessor; DoomFlight only uses its dictionary through the merged packet list
+    set_target_properties(Doom Doom_DoomEngine Doom_FrameDownsampler Doom_FrameTlmProcessor fprime_stress_doomgeneric
+                          PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()

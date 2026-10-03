@@ -68,4 +68,6 @@ module DoomFlight {
 
   instance cmdSplitter: Svc.CmdSplitter base id 0x1001B000
 
+  instance tlmSplitter: Components.TlmSplitter base id 0x1001C000
+
 }

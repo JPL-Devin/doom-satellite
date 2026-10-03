@@ -9,6 +9,9 @@ module DoomFlight {
     rateGroup1Hz
   }
 
+  @ Hub serial port carrying the echo of the remote telemetry stream (DoomCoprocessor tlmEcho.serialIn)
+  constant HUB_TLM_ECHO_PORT = 0
+
   deployment topology DoomFlight {
 
   # ----------------------------------------------------------------------
@@ -29,6 +32,7 @@ module DoomFlight {
     instance nullPrmDb
     instance touchReset
     instance cmdSplitter
+    instance tlmSplitter
     instance hub
     instance hubComDriver
     instance hubByteStreamAdapter
@@ -87,9 +91,16 @@ module DoomFlight {
       cmdSplitter.RemoteCmd -> hub.cmdDispIn
       hub.cmdRespOut        -> ComCcsds.fprimeRouter.cmdResponseIn
 
-      # Remote events and telemetry join the local downlink
+      # Remote events join the local downlink
       hub.eventOut -> CdhCore.events.LogRecv
-      hub.tlmOut   -> CdhCore.tlmSend.TlmRecv
+    }
+
+    connections HubTelemetry {
+      # Remote (DOOM) telemetry is split: one copy is packetized for the local downlink using the merged packet list
+      # (tools/merge_packets.py), the other is echoed back to DoomCoprocessor on hub serial port HUB_TLM_ECHO_PORT
+      hub.tlmOut                -> tlmSplitter.tlmIn
+      tlmSplitter.tlmOut        -> CdhCore.tlmSend.TlmRecv
+      tlmSplitter.echoOut       -> hub.serialIn[HUB_TLM_ECHO_PORT]
     }
 
     connections Hub {

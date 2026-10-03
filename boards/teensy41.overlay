@@ -1,0 +1,102 @@
+/*
+ * PJRC Teensy 4.1 for DoomFlight
+ *
+ * - USB CDC ACM is the console and the F Prime downlink/uplink (Zephyr.ZephyrUartDriver) and touch reset UART
+ * - Native ENET Ethernet (PJRC Ethernet kit) is enabled by the board devicetree
+ * - APS6404L PSRAM soldered on the bottom PSRAM pads, memory mapped by FlexSPI2 at 0x70000000
+ */
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};
+
+/ {
+	chosen {
+		zephyr,console = &cdc_acm_uart0;
+		zephyr,shell-uart = &cdc_acm_uart0;
+		/* 512 KB on-chip OCRAM instead of the board default 256 KB FlexRAM OCRAM: DoomFlight needs ~300 KB */
+		zephyr,sram = &ocram2;
+	};
+
+	/* PSRAM linker region: sections may be placed here with Z_GENERIC_SECTION(PSRAM) once FlexSPI2 is up */
+	psram: memory@70000000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x70000000 DT_SIZE_M(8)>;
+		zephyr,memory-region = "PSRAM";
+	};
+};
+
+&pinctrl {
+	/* Teensy 4.1 PSRAM pads: GPIO_EMC_22 (CS1), 23 (DQS), 24 (CS0), 25 (SCLK), 26-29 (DATA0-3) */
+	pinmux_flexspi2: pinmux_flexspi2 {
+		group0 {
+			pinmux = <&iomuxc_gpio_emc_23_flexspi2_a_dqs>;
+			drive-strength = "r0-6";
+			input-schmitt-enable;
+			bias-pull-down;
+			bias-pull-down-value = "100k";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+			input-enable;
+		};
+
+		group1 {
+			pinmux = <&iomuxc_gpio_emc_22_flexspi2_a_ss1_b>,
+				 <&iomuxc_gpio_emc_24_flexspi2_a_ss0_b>,
+				 <&iomuxc_gpio_emc_25_flexspi2_a_sclk>,
+				 <&iomuxc_gpio_emc_26_flexspi2_a_data0>,
+				 <&iomuxc_gpio_emc_27_flexspi2_a_data1>,
+				 <&iomuxc_gpio_emc_28_flexspi2_a_data2>,
+				 <&iomuxc_gpio_emc_29_flexspi2_a_data3>;
+			drive-strength = "r0-6";
+			slew-rate = "fast";
+			nxp,speed = "200-mhz";
+			input-enable;
+		};
+	};
+};
+
+&flexspi2 {
+	status = "okay";
+	reg = <0x402a4000 0x4000>, <0x70000000 DT_SIZE_M(16)>;
+	pinctrl-0 = <&pinmux_flexspi2>;
+	pinctrl-names = "default";
+	rx-clock-source = <1>;
+
+	/* First chip (small pads, CS0): required */
+	aps6404l0: aps6404l@0 {
+		compatible = "nxp,imx-flexspi-aps6404l";
+		/* APS6404L is 8MB, 64MBit pSRAM */
+		size = <DT_SIZE_M(8 * 8)>;
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(88)>;
+		status = "okay";
+		cs-interval-unit = <1>;
+		cs-interval = <2>;
+		cs-hold-time = <3>;
+		cs-setup-time = <3>;
+		data-valid-time = <6>;
+		column-space = <0>;
+		ahb-write-wait-unit = <2>;
+		ahb-write-wait-interval = <0>;
+	};
+
+	/* Second chip (large pads, CS1) on 16 MB boards: enable here and grow the psram region to DT_SIZE_M(16) */
+	aps6404l1: aps6404l@1 {
+		compatible = "nxp,imx-flexspi-aps6404l";
+		size = <DT_SIZE_M(8 * 8)>;
+		reg = <1>;
+		spi-max-frequency = <DT_FREQ_M(88)>;
+		status = "disabled";
+		cs-interval-unit = <1>;
+		cs-interval = <2>;
+		cs-hold-time = <3>;
+		cs-setup-time = <3>;
+		data-valid-time = <6>;
+		column-space = <0>;
+		ahb-write-wait-unit = <2>;
+		ahb-write-wait-interval = <0>;
+	};
+};

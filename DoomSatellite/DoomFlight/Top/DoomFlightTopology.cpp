@@ -5,8 +5,7 @@
 // ======================================================================
 // Provides access to autocoded functions
 #include <DoomSatellite/DoomFlight/Top/DoomFlightTopologyAc.hpp>
-// Note: Uncomment when using Svc:TlmPacketizer
-// #include <DoomSatellite/DoomFlight/Top/DoomFlightPacketsAc.hpp>
+#include <DoomSatellite/DoomFlight/Top/DoomSatelliteMergedPackets.hpp>
 
 // Necessary project-specified types
 #include <Fw/Types/MallocAllocator.hpp>
@@ -75,6 +74,9 @@ void configureTopology(const TopologyState& state) {
     (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort);
 
     cmdSplitter.configure(REMOTE_BASE_OPCODE);
+
+    // Replace the autocoded DoomFlight-only packet list with the merged DoomFlight + DoomCoprocessor list
+    CdhCore::tlmSend.setPacketList(DoomSatelliteMergedPackets::packetList, Svc::IGNORE_OMIT_LIST, 1);
 }
 
 // Public functions for use in main program are namespaced with deployment name DoomFlight
