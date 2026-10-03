@@ -9,6 +9,9 @@
 // Necessary project-specified types
 #include <Fw/Types/MallocAllocator.hpp>
 
+#include <zephyr/drivers/uart.h>
+#include <zephyr/kernel.h>
+
 #include <cstring>
 
 // Allows easy reference to objects in FPP/autocoder required namespaces
@@ -46,6 +49,25 @@ enum TopologyConstants {
 
 // Opcodes at or above the DoomCoprocessor base id are forwarded through the hub
 constexpr FwOpcodeType REMOTE_BASE_OPCODE = 0x20000000;
+
+#if defined(CONFIG_USBD_CDC_ACM_CLASS)
+constexpr U32 CDC_FLOW_CONTROL_POLL_MS = 100;
+static const struct device* cdcUartDevice = nullptr;
+static struct k_work_delayable cdcFlowControlWork;
+
+//! CDC ACM discards writes once its TX FIFO is full unless flow control is set, in which case writes block. Writes
+//! block only while the host asserts DTR, so a closed host port drops downlink bytes instead of stalling the sender.
+static void updateCdcFlowControl(struct k_work* work) {
+    U32 dtr = 0;
+    struct uart_config uartConfig;
+    if ((uart_line_ctrl_get(cdcUartDevice, UART_LINE_CTRL_DTR, &dtr) == 0) &&
+        (uart_config_get(cdcUartDevice, &uartConfig) == 0)) {
+        uartConfig.flow_ctrl = (dtr != 0) ? UART_CFG_FLOW_CTRL_RTS_CTS : UART_CFG_FLOW_CTRL_NONE;
+        (void)uart_configure(cdcUartDevice, &uartConfig);
+    }
+    (void)k_work_schedule(k_work_delayable_from_work(work), K_MSEC(CDC_FLOW_CONTROL_POLL_MS));
+}
+#endif
 
 /**
  * \brief configure/setup components in project-specific way
@@ -101,6 +123,11 @@ void setupTopology(const TopologyState& state) {
                        Default::STACK_SIZE);
 
     comDriver.configure(state.uartDevice, state.baudRate);
+#if defined(CONFIG_USBD_CDC_ACM_CLASS)
+    cdcUartDevice = state.uartDevice;
+    k_work_init_delayable(&cdcFlowControlWork, updateCdcFlowControl);
+    (void)k_work_schedule(&cdcFlowControlWork, K_NO_WAIT);
+#endif
 }
 
 void startRateGroups() {

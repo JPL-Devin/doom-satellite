@@ -14,6 +14,9 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/fatal.h>
 #include <zephyr/kernel.h>
+#if defined(CONFIG_BOARD_TEENSY41)
+#include <zephyr/net/phy.h>
+#endif
 #if defined(CONFIG_RETENTION_BOOT_MODE)
 #include <zephyr/retention/bootmode.h>
 #endif
@@ -64,10 +67,17 @@ extern "C" void k_sys_fatal_error_handler(unsigned int reason, const struct arch
     crashRecord.pc = (esf != nullptr) ? esf->basic.pc : 0;
     crashRecord.lr = (esf != nullptr) ? esf->basic.lr : 0;
     crashRecord.xpsr = (esf != nullptr) ? esf->basic.xpsr : 0;
+#if defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
     crashRecord.cfsr = SCB->CFSR;
     crashRecord.hfsr = SCB->HFSR;
     crashRecord.mmfar = SCB->MMFAR;
     crashRecord.bfar = SCB->BFAR;
+#else
+    crashRecord.cfsr = 0;
+    crashRecord.hfsr = 0;
+    crashRecord.mmfar = 0;
+    crashRecord.bfar = 0;
+#endif
     struct k_thread* thread = k_current_get();
     crashRecord.stackStart = (thread != nullptr) ? static_cast<U32>(thread->stack_info.start) : 0;
     const char* name = (thread != nullptr) ? k_thread_name_get(thread) : nullptr;
@@ -85,11 +95,29 @@ static void printCrashRecord(const CrashRecord& record, U32 resetCause) {
            record.bfar);
 }
 
+#if defined(CONFIG_BOARD_TEENSY41)
+static const struct device* const ethernetPhy = DEVICE_DT_GET(DT_NODELABEL(phy));
+
+//! Reapplies the DP83825 configuration (RMII reference clock, advertised link modes) once the ENET MAC is running
+static void configureEthernetPhy() {
+    const int status = phy_configure_link(
+        ethernetPhy,
+        static_cast<enum phy_link_speed>(LINK_HALF_10BASE | LINK_FULL_10BASE | LINK_HALF_100BASE | LINK_FULL_100BASE),
+        static_cast<enum phy_cfg_link_flag>(0));
+    if (status != 0) {
+        printk("DoomFlight: PHY configuration failed %d\n", status);
+    }
+}
+#endif
+
 //! Watches for the 1200 baud touch before the topology starts. After a fatal error, stays here reporting it.
 static void bootWindow() {
     U32 resetCause = 0;
     (void)hwinfo_get_reset_cause(&resetCause);
     (void)hwinfo_clear_reset_cause();
+#if defined(CONFIG_BOARD_TEENSY41)
+    configureEthernetPhy();
+#endif
     const bool crashed = (crashRecord.magic == CRASH_RECORD_MAGIC);
     const CrashRecord record = crashRecord;
     crashRecord.magic = 0;
