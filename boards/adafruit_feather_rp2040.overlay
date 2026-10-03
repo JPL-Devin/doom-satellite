@@ -1,0 +1,33 @@
+/* Boot mode retention used by Zephyr.ZephyrTouchReset to reboot into the ROM UF2 bootloader */
+#include <vendor/raspberrypi/rp2040-boot-mode-retention.dtsi>
+
+&zephyr_udc0 {
+    cdc_acm_uart0: cdc_acm_uart0 {
+        compatible = "zephyr,cdc-acm-uart";
+    };
+};
+
+/ {
+    chosen {
+        zephyr,console = &cdc_acm_uart0;
+    };
+};
+
+/*
+ * Adafruit Ethernet FeatherWing (WIZ5500) on the Feather SPI bus (GP18 SCK, GP19 MOSI, GP20 MISO).
+ * CS is the FeatherWing default (Feather pin 10). IRQ and RST are jumpered from their pads to
+ * Feather pins 11 and 12.
+ */
+&spi0 {
+    cs-gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+
+    ethernet: w5500@0 {
+        compatible = "wiznet,w5500";
+        reg = <0x0>;
+        spi-max-frequency = <DT_FREQ_M(8)>;
+        int-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+        reset-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+        local-mac-address = [02 44 4f 4f 4d 02];
+        status = "okay";
+    };
+};
