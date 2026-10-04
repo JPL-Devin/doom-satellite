@@ -101,8 +101,6 @@ void configureTopology(const TopologyState& state) {
     (void)hubComDriver.configureSend(state.hubRemoteAddress, state.hubRemotePort);
     (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort, HUB_LARGE_BUFFER_SIZE);
 
-    frameRepeater.configure(Svc::BufferRepeater::WARNING_ON_OUT_OF_MEMORY);
-
     cmdSplitter.configure(REMOTE_BASE_OPCODE);
 }
 

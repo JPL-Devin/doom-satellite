@@ -65,4 +65,10 @@ module DoomCoprocessor {
   @ Packs downsampled frames and palettes for the hub; unpacks the copies DoomFlight echoes back
   instance frameAdapter: Components.FrameBufferAdapter base id 0x2000A000
 
+  @ Repeats each downsampled frame and palette, on its native port type, to the hub packer and the Python reader
+  instance frameRepeater: Components.FrameRepeater base id 0x2000B000
+
+  @ Python (fprime-python) reader of the downsampled frames
+  instance frameReader: Components.DoomFrameReader base id 0x2000C000
+
 }

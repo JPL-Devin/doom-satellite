@@ -12,6 +12,12 @@ module DoomCoprocessor {
   @ Hub buffer port carrying packed downsampled frames and palettes to DoomFlight, and DoomFlight's echo of them back
   constant HUB_FRAME_PORT = 0
 
+  @ Repeater outputs
+  enum Ports_FrameRepeater {
+    HUB     @< Packed for DoomFlight by frameAdapter
+    READER  @< Read in Python by frameReader
+  }
+
   deployment topology DoomCoprocessor {
 
   # ----------------------------------------------------------------------
@@ -35,6 +41,8 @@ module DoomCoprocessor {
     instance rateGroupDriver
     instance linuxTimer
     instance frameAdapter
+    instance frameRepeater
+    instance frameReader
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers
@@ -49,16 +57,19 @@ module DoomCoprocessor {
       rateGroupDoom
       rateGroup1Hz
       frameAdapter
+      frameReader
       DoomSubtopology.doom
       DoomSubtopology.doomBufferManager
       DoomSubtopology.frameDownsampler
     }
 
-    # Only the DOOM engine and frame adapter telemetry cross the hub: DoomFlight packetizes it with the merged
+    # Only the DOOM engine and frame pipeline telemetry cross the hub: DoomFlight packetizes it with the merged
     # packet list (tools/merge_packets.py)
     telemetry connections instance hub {
       DoomSubtopology.doom
       frameAdapter
+      frameRepeater
+      frameReader
     }
 
     time connections instance chronoTime
@@ -91,8 +102,14 @@ module DoomCoprocessor {
     connections FramePipeline {
       DoomSubtopology.doom.frameOut               -> DoomSubtopology.frameDownsampler.frameIn
       DoomSubtopology.doom.paletteOut             -> DoomSubtopology.frameDownsampler.paletteIn
-      DoomSubtopology.frameDownsampler.frameOut   -> frameAdapter.frameIn
-      DoomSubtopology.frameDownsampler.paletteOut -> frameAdapter.paletteIn
+      DoomSubtopology.frameDownsampler.frameOut   -> frameRepeater.frameIn
+      DoomSubtopology.frameDownsampler.paletteOut -> frameRepeater.paletteIn
+
+      # Each downsampled frame and palette is repeated, on its native type, to the hub packer and the Python reader
+      frameRepeater.frameOut[Ports_FrameRepeater.HUB]      -> frameAdapter.frameIn
+      frameRepeater.paletteOut[Ports_FrameRepeater.HUB]    -> frameAdapter.paletteIn
+      frameRepeater.frameOut[Ports_FrameRepeater.READER]   -> frameReader.frameIn
+      frameRepeater.paletteOut[Ports_FrameRepeater.READER] -> frameReader.paletteIn
     }
 
     connections HubFrames {

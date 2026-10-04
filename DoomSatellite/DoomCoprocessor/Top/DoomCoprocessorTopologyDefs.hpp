@@ -10,6 +10,7 @@
 
 #include "Doom/DoomConfig/FppConstantsAc.hpp"
 #include "Doom/DoomSubtopology/SubtopologyTopologyDefs.hpp"
+#include "Fw/Types/String.hpp"
 
 // DoomSubtopology configuration phases call memset
 #include <cstring>
@@ -33,10 +34,10 @@ namespace DoomCoprocessor {
  * autocoder.
  */
 struct TopologyState {
-    const char* hubRemoteAddress = nullptr;  //!< IPv4 address of the remote (control node) GenericHub deployment
+    Fw::String hubRemoteAddress;             //!< IPv4 address of the remote (control node) GenericHub deployment
     U16 hubRemotePort = 0;                   //!< UDP port the remote GenericHub receives on
     U16 hubLocalPort = 0;                    //!< UDP port this GenericHub receives on
-    const char* wadPath = nullptr;           //!< DOOM IWAD path; the engine is not created when it cannot be opened
+    Fw::String wadPath;                      //!< DOOM IWAD path; the engine is not created when it cannot be opened
     bool autoStart = false;                  //!< Start the DOOM engine at setup instead of waiting for doom.Start
     DoomSubtopology::SubtopologyState doom;
 };

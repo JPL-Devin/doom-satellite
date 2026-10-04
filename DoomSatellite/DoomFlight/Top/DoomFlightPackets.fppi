@@ -48,6 +48,12 @@ telemetry packets DoomFlightPackets {
     frameAdapter.FramesRejected
     frameAdapter.PalettesUnpacked
     frameAdapter.PalettesRejected
+    frameRepeater.FramesRepeated
+    frameRepeater.PalettesRepeated
+    frameEchoAdapter.FramesPacked
+    frameEchoAdapter.FramesRejected
+    frameEchoAdapter.PalettesPacked
+    frameEchoAdapter.PalettesRejected
   }
 
   packet DoomPalette id 0x101 group 1 {
@@ -226,9 +232,12 @@ telemetry packets DoomFlightPackets {
   CdhCore.version.CustomVersion08
   CdhCore.version.CustomVersion09
   CdhCore.version.CustomVersion10
-  # Unused on DoomFlight: frameAdapter only unpacks
+  # Unused on DoomFlight: frameAdapter only unpacks, frameEchoAdapter only packs
   frameAdapter.FramesPacked
   frameAdapter.PalettesPacked
+  frameEchoAdapter.PackedRejected
+  frameEchoAdapter.FramesUnpacked
+  frameEchoAdapter.PalettesUnpacked
   # Rows beyond Doom.DOWNSAMPLED_HEIGHT are never written
   frameTlmProcessor.FrameRow050
   frameTlmProcessor.FrameRow051

@@ -4,16 +4,16 @@
 
 `Components::FrameBufferAdapter` is a passive component that converts the DOOM frame pipeline's typed ports
 (`Doom.RawFrame`, `Doom.PaletteSend`) to and from `Fw::Buffer`, so that downsampled frames and palettes can cross one
-GenericHub buffer port. It also relays buffers to a sender that returns them on a matched port (GenericHub
-`bufferIn`), and returns them to their allocator afterwards.
+GenericHub buffer port. Fan-out to several consumers happens on the typed ports, before packing or after unpacking,
+through `Components::FrameRepeater`; the adapter itself only converts at the hub boundary.
 
 In DoomSatellite:
 
-- **DoomCoprocessor** packs each downsampled frame and palette from `DoomSubtopology.frameDownsampler` onto
+- **DoomCoprocessor** `frameAdapter` packs each downsampled frame and palette repeated by `frameRepeater` onto
   `hub.bufferIn`, and unpacks (counts) the copies DoomFlight echoes back on `hub.bufferOut`.
-- **DoomFlight** receives each packed buffer from `hub.bufferOut` through a `Svc::BufferRepeater`. One copy is relayed
-  back to DoomCoprocessor through `echoIn`/`echoOut`; the other is unpacked on `packedIn` and sent to
-  `frameTlmProcessor`, whose row and palette telemetry is downlinked over CDC ACM.
+- **DoomFlight** `frameAdapter` unpacks each packed buffer from `hub.bufferOut` onto `frameRepeater`, which feeds
+  `frameTlmProcessor` (row and palette telemetry downlinked over CDC ACM) and a second instance, `frameEchoAdapter`,
+  that re-packs the frame onto `hub.bufferIn` as the echo to DoomCoprocessor.
 
 ## 2. Requirements
 
@@ -26,7 +26,6 @@ In DoomSatellite:
 | FRAME-BUFFER-ADAPTER-005 | The component shall unpack each buffer received on `packedIn` by its kind byte: a valid frame to `frameOut`, a valid palette to `paletteOut`. | Unit test, integration test |
 | FRAME-BUFFER-ADAPTER-006 | The component shall reject a buffer on `packedIn` that is null, shorter than a kind byte, or carries an unknown kind (`PackedRejected`); a frame whose header is short, whose geometry is invalid or whose size does not match its geometry (`FrameRejected`); and a palette whose size is not the packed palette size (`PaletteRejected`). | Unit test |
 | FRAME-BUFFER-ADAPTER-007 | The component shall return every buffer received on `packedIn` on `packedInReturn` exactly once, whether or not it was unpacked. | Unit test |
-| FRAME-BUFFER-ADAPTER-008 | The component shall forward each buffer received on `echoIn` on `echoOut` unchanged, and return each buffer received on `echoOutReturn` on `echoReturn`. When `echoOut` is not connected, it shall return the buffer on `echoReturn` immediately. | Unit test, integration test |
 | FRAME-BUFFER-ADAPTER-009 | The component shall report packed, unpacked and rejected frame and palette counts, and rejected packed buffers, as telemetry. | Unit test, integration test |
 
 ## 3. Design
@@ -43,10 +42,6 @@ In DoomSatellite:
 | `output` | `packedInReturn` | `Fw.BufferSend` | Return of every buffer received on `packedIn` |
 | `output` | `frameOut` | `Doom.RawFrame` | Unpacked frame; the pixels reference the received buffer and are valid only during the call |
 | `output` | `paletteOut` | `Doom.PaletteSend` | Unpacked palette |
-| `sync input` | `echoIn` | `Fw.BufferSend` | Buffer to relay |
-| `output` | `echoOut` | `Fw.BufferSend` | Relayed buffer |
-| `sync input` | `echoOutReturn` | `Fw.BufferSend` | Return of buffers sent on `echoOut` |
-| `output` | `echoReturn` | `Fw.BufferSend` | Return of buffers received on `echoIn` to their allocator |
 
 ### 3.2 Packed format
 
@@ -64,16 +59,17 @@ All fields are big-endian (F Prime serialization).
   buffer into its own allocation and returns it synchronously.
 - **Unpack:** `packedIn` never keeps the buffer: it is returned on `packedInReturn` before the handler returns.
   `frameOut` passes a view of the received pixels that is valid only during the call.
-- **Echo:** the component does not inspect echoed buffers. GenericHub requires `bufferInReturn[i]` to reach the
-  component that called `bufferIn[i]`, so the relay sits between the allocator-owning sender (`Svc::BufferRepeater`)
-  and the hub, and routes the hub's return to the allocator on `echoReturn`.
+- **Echo (DoomFlight):** GenericHub requires `bufferInReturn[i]` to reach the component that called `bufferIn[i]`,
+  so the echo is produced by a dedicated packing instance (`frameEchoAdapter`) fed from the unpacked frame; no
+  received buffer is held beyond its `packedIn` call. The unpack and re-pack instances are distinct because the
+  guarded `packedIn` -> `frameOut` -> `frameIn` chain would re-enter a single instance's mutex.
 
 ### 3.4 Concurrency
 
 `frameIn`, `paletteIn` and `packedIn` are guarded: on DoomCoprocessor, frames are packed on the DOOM rate group thread
 while echoed buffers are unpacked on the hub's UDP receive thread, and both update the rejection counters.
-`packedOutReturn`, `echoOutReturn` and the echo ports are sync because GenericHub returns buffers within the
-`packedOut` / `echoOut` call, from the calling thread; a guarded return port would deadlock on the held mutex.
+`packedOutReturn` is sync because GenericHub returns buffers within the `packedOut` call, from the calling thread; a
+guarded return port would deadlock on the held mutex.
 
 When `packedOut` is not connected, `frameIn` and `paletteIn` drop their input without counting it.
 
@@ -109,7 +105,6 @@ Throttles are cleared by the next successful frame or palette.
 | `Pack.RejectsWhileLent` | 004 |
 | `Unpack.RoundTripsFrame`, `Unpack.RoundTripsPalette` | 005, 007 |
 | `Unpack.RejectsInvalidPacked`, `Unpack.RejectsInvalidFrame`, `Unpack.RejectsInvalidPalette` | 006, 007 |
-| `Echo.RelaysAndReturns`, `Echo.ReturnsWhenUnconnected` | 008 |
 
-Integration tests in `DoomSatellite/DoomFlight/test/int/frame_test.py` exercise 005, 008 and 009 across the
-physical hub with DOOM running on DoomCoprocessor.
+Integration tests in `DoomSatellite/DoomFlight/test/int/frame_test.py` exercise 005 and 009 across the physical hub
+with DOOM running on DoomCoprocessor.

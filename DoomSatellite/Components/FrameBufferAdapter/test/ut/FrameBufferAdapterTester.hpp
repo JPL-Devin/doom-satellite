@@ -31,8 +31,6 @@ class FrameBufferAdapterTester final : public FrameBufferAdapterGTestBase {
     void testRejectsInvalidPacked();
     void testRejectsInvalidPackedFrame();
     void testRejectsInvalidPackedPalette();
-    void testEchoRelaysAndReturns();
-    void testEchoReturnsWhenUnconnected();
 
   private:
     void connectPorts();

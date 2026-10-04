@@ -50,16 +50,6 @@ TEST(Unpack, RejectsInvalidPalette) {
     tester.testRejectsInvalidPackedPalette();
 }
 
-TEST(Echo, RelaysAndReturns) {
-    Components::FrameBufferAdapterTester tester;
-    tester.testEchoRelaysAndReturns();
-}
-
-TEST(Echo, ReturnsWhenUnconnected) {
-    Components::FrameBufferAdapterTester tester;
-    tester.testEchoReturnsWhenUnconnected();
-}
-
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

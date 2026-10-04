@@ -26,6 +26,16 @@ telemetry packets DoomCoprocessorPackets {
     frameAdapter.PalettesRejected
   }
 
+  packet CoprocessorFrameReader id 0x103 group 1 {
+    frameRepeater.FramesRepeated
+    frameRepeater.PalettesRepeated
+    frameReader.FramesRead
+    frameReader.PalettesRead
+    frameReader.LastFrame
+    frameReader.MeanPixel
+    frameReader.MeanBrightness
+  }
+
 } omit {
   # Not sent across the hub
   # Local housekeeping: not routed across the hub

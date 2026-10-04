@@ -49,12 +49,12 @@ void configureTopology(const DoomCoprocessor::TopologyState& state) {
     hubBins.bins[1].numBuffers = HUB_LARGE_BUFFER_COUNT;
     hubBufferManager.setup(HUB_BUFFER_MANAGER_ID, 0, mallocator, hubBins);
 
-    (void)hubComDriver.configureSend(state.hubRemoteAddress, state.hubRemotePort);
+    (void)hubComDriver.configureSend(state.hubRemoteAddress.toChar(), state.hubRemotePort);
     (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort, HUB_LARGE_BUFFER_SIZE);
 
     // All engine heap allocation happens here, before any task runs. An unreadable WAD leaves the engine uncreated
     // and doom.Start is rejected.
-    Doom::InitStatus initStatus = DoomSubtopology::doom.setWadPath((state.wadPath != nullptr) ? state.wadPath : "");
+    Doom::InitStatus initStatus = DoomSubtopology::doom.setWadPath(state.wadPath.toChar());
     if (initStatus == Doom::InitStatus::OK) {
         initStatus = DoomSubtopology::doom.initEngine();
     }
@@ -114,5 +114,7 @@ void teardownTopology(const TopologyState& state) {
     (void)hubComDriver.join();
     hubBufferManager.cleanup();
     tearDownComponents(state);
+    // Releases the Python mirror objects held by fprime-python components before the interpreter finalizes
+    deinitComponents(state);
 }
 };  // namespace DoomCoprocessor

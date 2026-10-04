@@ -238,20 +238,4 @@ void FrameBufferAdapter::packedIn_handler(FwIndexType portNum, Fw::Buffer& fwBuf
     this->packedInReturn_out(0, fwBuffer);
 }
 
-// ----------------------------------------------------------------------
-// Echo relay
-// ----------------------------------------------------------------------
-
-void FrameBufferAdapter::echoIn_handler(FwIndexType portNum, Fw::Buffer& fwBuffer) {
-    if (this->isConnected_echoOut_OutputPort(0)) {
-        this->echoOut_out(0, fwBuffer);
-    } else {
-        this->echoReturn_out(0, fwBuffer);
-    }
-}
-
-void FrameBufferAdapter::echoOutReturn_handler(FwIndexType portNum, Fw::Buffer& fwBuffer) {
-    this->echoReturn_out(0, fwBuffer);
-}
-
 }  // namespace Components

@@ -67,15 +67,21 @@ constexpr Svc::TlmPacketizerChannelEntry VersionChannels[] = {
 static_assert(PACKET_HEADER_SIZE + 192 <= FW_COM_BUFFER_MAX_SIZE, "Packet Version exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket Version = {VersionChannels, 0x4, 3, FW_NUM_ARRAY_ELEMENTS(VersionChannels)};
 
-// Packet FlightFrameAdapter: id 0x10, group 1, 20 data bytes
+// Packet FlightFrameAdapter: id 0x10, group 1, 44 data bytes
 constexpr Svc::TlmPacketizerChannelEntry FlightFrameAdapterChannels[] = {
     {0x1001d000, 4},  // DoomFlight.frameAdapter.PackedRejected
     {0x1001d002, 4},  // DoomFlight.frameAdapter.FramesUnpacked
     {0x1001d003, 4},  // DoomFlight.frameAdapter.FramesRejected
     {0x1001d005, 4},  // DoomFlight.frameAdapter.PalettesUnpacked
     {0x1001d006, 4},  // DoomFlight.frameAdapter.PalettesRejected
+    {0x1001c000, 4},  // DoomFlight.frameRepeater.FramesRepeated
+    {0x1001c001, 4},  // DoomFlight.frameRepeater.PalettesRepeated
+    {0x1001e001, 4},  // DoomFlight.frameEchoAdapter.FramesPacked
+    {0x1001e003, 4},  // DoomFlight.frameEchoAdapter.FramesRejected
+    {0x1001e004, 4},  // DoomFlight.frameEchoAdapter.PalettesPacked
+    {0x1001e006, 4},  // DoomFlight.frameEchoAdapter.PalettesRejected
 };
-static_assert(PACKET_HEADER_SIZE + 20 <= FW_COM_BUFFER_MAX_SIZE, "Packet FlightFrameAdapter exceeds FW_COM_BUFFER_MAX_SIZE");
+static_assert(PACKET_HEADER_SIZE + 44 <= FW_COM_BUFFER_MAX_SIZE, "Packet FlightFrameAdapter exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket FlightFrameAdapter = {FlightFrameAdapterChannels, 0x10, 1, FW_NUM_ARRAY_ELEMENTS(FlightFrameAdapterChannels)};
 
 // Packet DoomEngine: id 0x100, group 1, 37 data bytes
@@ -112,6 +118,19 @@ constexpr Svc::TlmPacketizerChannelEntry CoprocessorFrameAdapterChannels[] = {
 };
 static_assert(PACKET_HEADER_SIZE + 28 <= FW_COM_BUFFER_MAX_SIZE, "Packet CoprocessorFrameAdapter exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket CoprocessorFrameAdapter = {CoprocessorFrameAdapterChannels, 0x102, 1, FW_NUM_ARRAY_ELEMENTS(CoprocessorFrameAdapterChannels)};
+
+// Packet CoprocessorFrameReader: id 0x103, group 1, 28 data bytes
+constexpr Svc::TlmPacketizerChannelEntry CoprocessorFrameReaderChannels[] = {
+    {0x2000b000, 4},  // DoomCoprocessor.frameRepeater.FramesRepeated
+    {0x2000b001, 4},  // DoomCoprocessor.frameRepeater.PalettesRepeated
+    {0x2000c000, 4},  // DoomCoprocessor.frameReader.FramesRead
+    {0x2000c001, 4},  // DoomCoprocessor.frameReader.PalettesRead
+    {0x2000c002, 4},  // DoomCoprocessor.frameReader.LastFrame
+    {0x2000c003, 4},  // DoomCoprocessor.frameReader.MeanPixel
+    {0x2000c004, 4},  // DoomCoprocessor.frameReader.MeanBrightness
+};
+static_assert(PACKET_HEADER_SIZE + 28 <= FW_COM_BUFFER_MAX_SIZE, "Packet CoprocessorFrameReader exceeds FW_COM_BUFFER_MAX_SIZE");
+constexpr Svc::TlmPacketizerPacket CoprocessorFrameReader = {CoprocessorFrameReaderChannels, 0x103, 1, FW_NUM_ARRAY_ELEMENTS(CoprocessorFrameReaderChannels)};
 
 // Packet DoomFrameRow000: id 0x200, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow000Channels[] = {
@@ -475,6 +494,7 @@ const Svc::TlmPacketizerPacketList packetList = {
         &DoomEngine,
         &DoomPalette,
         &CoprocessorFrameAdapter,
+        &CoprocessorFrameReader,
         &DoomFrameRow000,
         &DoomFrameRow001,
         &DoomFrameRow002,

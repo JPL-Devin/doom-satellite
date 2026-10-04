@@ -40,6 +40,7 @@ module DoomFlight {
     instance cmdSplitter
     instance frameRepeater
     instance frameAdapter
+    instance frameEchoAdapter
     instance frameTlmProcessor
     instance hub
     instance hubComDriver
@@ -110,22 +111,20 @@ module DoomFlight {
     }
 
     connections HubFrames {
-      # The repeater copies each packed frame or palette from the hub, returns the original to the hub, and sends one
-      # copy back to DoomCoprocessor and one to frameAdapter. The echo copy is relayed by frameAdapter because the hub
-      # returns each bufferIn buffer to the instance that sent it, and the copy must go back to hubBufferManager.
-      hub.bufferOut[HUB_FRAME_PORT]                    -> frameRepeater.portIn
-      frameRepeater.deallocate                         -> hub.bufferOutReturn[HUB_FRAME_PORT]
-      frameRepeater.allocate                           -> hubBufferManager.bufferGetCallee
-      frameRepeater.portOut[Ports_FrameRepeater.ECHO]  -> frameAdapter.echoIn
-      frameAdapter.echoOut                             -> hub.bufferIn[HUB_FRAME_PORT]
-      hub.bufferInReturn[HUB_FRAME_PORT]               -> frameAdapter.echoOutReturn
-      frameAdapter.echoReturn                          -> hubBufferManager.bufferSendIn
-      frameRepeater.portOut[Ports_FrameRepeater.LOCAL] -> frameAdapter.packedIn
-      frameAdapter.packedInReturn                      -> hubBufferManager.bufferSendIn
+      # Each packed frame or palette from the hub is unpacked once; the hub's buffer is returned before the call ends
+      hub.bufferOut[HUB_FRAME_PORT] -> frameAdapter.packedIn
+      frameAdapter.packedInReturn   -> hub.bufferOutReturn[HUB_FRAME_PORT]
 
-      # Unpacked frames and palettes to frame telemetry
-      frameAdapter.frameOut   -> frameTlmProcessor.frameIn
-      frameAdapter.paletteOut -> frameTlmProcessor.paletteIn
+      # The unpacked frame and palette are repeated on their native types: one copy to frame telemetry, one re-packed
+      # by frameEchoAdapter as the echo to DoomCoprocessor. The hub copies the echo and returns it within the call.
+      frameAdapter.frameOut   -> frameRepeater.frameIn
+      frameAdapter.paletteOut -> frameRepeater.paletteIn
+      frameRepeater.frameOut[Ports_FrameRepeater.LOCAL]   -> frameTlmProcessor.frameIn
+      frameRepeater.paletteOut[Ports_FrameRepeater.LOCAL] -> frameTlmProcessor.paletteIn
+      frameRepeater.frameOut[Ports_FrameRepeater.ECHO]    -> frameEchoAdapter.frameIn
+      frameRepeater.paletteOut[Ports_FrameRepeater.ECHO]  -> frameEchoAdapter.paletteIn
+      frameEchoAdapter.packedOut         -> hub.bufferIn[HUB_FRAME_PORT]
+      hub.bufferInReturn[HUB_FRAME_PORT] -> frameEchoAdapter.packedOutReturn
     }
 
     connections Hub {

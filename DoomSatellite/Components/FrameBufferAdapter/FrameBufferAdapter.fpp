@@ -54,22 +54,6 @@ module Components {
         output port paletteOut: Doom.PaletteSend
 
         # ----------------------------------------------------------------------
-        # Echo relay: forwards allocated buffers to a sender that returns them
-        # ----------------------------------------------------------------------
-
-        @ Buffer to relay, e.g. a Svc.BufferRepeater copy; it is returned on echoReturn once echoOut gives it back
-        sync input port echoIn: Fw.BufferSend
-
-        @ Relayed buffer, e.g. to GenericHub bufferIn, which requires its return port to reach the same instance
-        output port echoOut: Fw.BufferSend
-
-        @ Return of buffers sent on echoOut
-        sync input port echoOutReturn: Fw.BufferSend
-
-        @ Return of buffers received on echoIn, e.g. to the BufferManager that allocated them
-        output port echoReturn: Fw.BufferSend
-
-        # ----------------------------------------------------------------------
         # Events and telemetry
         # ----------------------------------------------------------------------
 

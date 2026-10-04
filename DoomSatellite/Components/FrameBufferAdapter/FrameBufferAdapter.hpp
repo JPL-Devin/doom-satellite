@@ -42,10 +42,6 @@ class FrameBufferAdapter final : public FrameBufferAdapterComponentBase {
 
     void packedIn_handler(FwIndexType portNum, Fw::Buffer& fwBuffer) override;
 
-    void echoIn_handler(FwIndexType portNum, Fw::Buffer& fwBuffer) override;
-
-    void echoOutReturn_handler(FwIndexType portNum, Fw::Buffer& fwBuffer) override;
-
     //! Check frame geometry against the downsampled frame size
     static FrameBufferStatus checkGeometry(U16 width, U16 height);
 

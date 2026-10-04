@@ -305,37 +305,4 @@ void FrameBufferAdapterTester::testRejectsInvalidPackedPalette() {
     ASSERT_TLM_PalettesRejected(1, 2U);
 }
 
-// ----------------------------------------------------------------------
-// Echo relay
-// ----------------------------------------------------------------------
-
-void FrameBufferAdapterTester::testEchoRelaysAndReturns() {
-    Fw::Buffer buffer(this->m_packed, PALETTE_SIZE);
-    buffer.setContext(0x1234U);
-    this->invoke_to_echoIn(0, buffer);
-    ASSERT_from_echoOut_SIZE(1);
-    ASSERT_from_echoOut(0, buffer);
-    ASSERT_from_echoReturn_SIZE(0);
-
-    Fw::Buffer returned = this->fromPortHistory_echoOut->at(0).fwBuffer;
-    this->invoke_to_echoOutReturn(0, returned);
-    ASSERT_from_echoOut_SIZE(1);
-    ASSERT_from_echoReturn_SIZE(1);
-    ASSERT_from_echoReturn(0, buffer);
-    ASSERT_EVENTS_SIZE(0);
-    ASSERT_TLM_SIZE(0);
-}
-
-void FrameBufferAdapterTester::testEchoReturnsWhenUnconnected() {
-    FrameBufferAdapter unconnected("UnconnectedEcho");
-    unconnected.init(TEST_INSTANCE_ID);
-    unconnected.set_echoReturn_OutputPort(0, this->get_from_echoReturn(0));
-
-    Fw::Buffer buffer(this->m_packed, PALETTE_SIZE);
-    unconnected.get_echoIn_InputPort(0)->invoke(buffer);
-    ASSERT_from_echoOut_SIZE(0);
-    ASSERT_from_echoReturn_SIZE(1);
-    ASSERT_from_echoReturn(0, buffer);
-}
-
 }  // namespace Components
