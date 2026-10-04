@@ -9,6 +9,7 @@
 // Necessary project-specified types
 #include <Fw/Types/MallocAllocator.hpp>
 
+#include <zephyr/devicetree.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/kernel.h>
 
@@ -41,8 +42,10 @@ U32 rateGroup1HzContext[Svc::ActiveRateGroup::CONNECTION_COUNT_MAX] = {getRateGr
 
 enum TopologyConstants {
     HUB_BUFFER_MANAGER_ID = 300,
-    HUB_BUFFER_SIZE = 1024,  // Matches the Drv::Udp default receive buffer size
-    HUB_BUFFER_COUNT = 8,
+    HUB_SMALL_BUFFER_SIZE = 1024,  // Commands, events, telemetry and packed palettes
+    HUB_SMALL_BUFFER_COUNT = 8,
+    HUB_LARGE_BUFFER_SIZE = 4096,  // UDP receive buffers and packed frames (4,009 bytes, 4,025 with the hub header)
+    HUB_LARGE_BUFFER_COUNT = 12,
     HUB_RECV_PRIORITY = 5,
     HUB_RECONNECT_PRIORITY = 6,
 };
@@ -82,17 +85,23 @@ void configureTopology(const TopologyState& state) {
     // Rate groups require context arrays.
     rateGroup10Hz.configure(rateGroup10HzContext, FW_NUM_ARRAY_ELEMENTS(rateGroup10HzContext));
     rateGroup1Hz.configure(rateGroup1HzContext, FW_NUM_ARRAY_ELEMENTS(rateGroup1HzContext));
-    // Reboot into the bootloader when the host opens the console at 1200 baud
-    touchReset.configure(state.uartDevice);
+    // Reboot into the bootloader when the host opens the console at the board's touch baud rate
+    if (touchReset.configure(state.uartDevice) != Fw::Success::SUCCESS) {
+        printk("Touch reset unavailable\n");
+    }
 
     Svc::BufferManager::BufferBins hubBins;
     memset(&hubBins, 0, sizeof(hubBins));
-    hubBins.bins[0].bufferSize = HUB_BUFFER_SIZE;
-    hubBins.bins[0].numBuffers = HUB_BUFFER_COUNT;
-    hubBufferManager.setup(HUB_BUFFER_MANAGER_ID, 0, mallocator, hubBins);
+    hubBins.bins[0].bufferSize = HUB_SMALL_BUFFER_SIZE;
+    hubBins.bins[0].numBuffers = HUB_SMALL_BUFFER_COUNT;
+    hubBins.bins[1].bufferSize = HUB_LARGE_BUFFER_SIZE;
+    hubBins.bins[1].numBuffers = HUB_LARGE_BUFFER_COUNT;
+    hubBufferManager.setup(HUB_BUFFER_MANAGER_ID, 0, ComCcsds::Allocation::memAllocator, hubBins);
 
     (void)hubComDriver.configureSend(state.hubRemoteAddress, state.hubRemotePort);
-    (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort);
+    (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort, HUB_LARGE_BUFFER_SIZE);
+
+    frameRepeater.configure(Svc::BufferRepeater::WARNING_ON_OUT_OF_MEMORY);
 
     cmdSplitter.configure(REMOTE_BASE_OPCODE);
 }

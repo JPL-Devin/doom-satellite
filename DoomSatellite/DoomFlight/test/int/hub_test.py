@@ -38,7 +38,7 @@ def test_remote_no_op_string(fprime_test_api):
     )
 
 
-@pytest.mark.skip(reason="DoomCoprocessor telemetry is not sent across the hub")
+@pytest.mark.skip(reason="DoomCoprocessor cmdDisp telemetry is not sent across the hub; frame_test.py covers remote telemetry")
 def test_remote_telemetry(fprime_test_api):
     """DoomCoprocessor telemetry is injected into DoomFlight's downlink by the hub"""
     fprime_test_api.send_command("DoomCoprocessor.cmdDisp.CMD_NO_OP")

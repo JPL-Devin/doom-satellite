@@ -63,7 +63,7 @@ namespace DoomFlight {
  * contents are entirely up to the definition of the project. This deployment uses subtopologies.
  */
 struct TopologyState {
-    const device* uartDevice;             //!< USB CDC ACM UART carrying the ground link and the 1200 baud touch reset
+    const device* uartDevice;             //!< USB CDC ACM UART carrying the ground link and the touch reset
     U32 baudRate;                         //!< Baud rate for the ground link UART
     const char* hubRemoteAddress;         //!< IPv4 address of the remote GenericHub deployment
     U16 hubRemotePort;                    //!< UDP port the remote GenericHub receives on

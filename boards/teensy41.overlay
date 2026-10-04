@@ -16,8 +16,15 @@
 	chosen {
 		zephyr,console = &cdc_acm_uart0;
 		zephyr,shell-uart = &cdc_acm_uart0;
-		/* 512 KB on-chip OCRAM instead of the board default 256 KB FlexRAM OCRAM: DoomFlight needs ~300 KB */
-		zephyr,sram = &ocram2;
+		zephyr,sram = &sram;
+	};
+
+	/* OCRAM2 (512 KB at 0x20200000) and FlexRAM OCRAM (256 KB at 0x20280000, fuse default bank split) are
+	 * contiguous, so Zephyr uses them as one 768 KB RAM region for data, stacks and the malloc heap.
+	 */
+	sram: memory@20200000 {
+		compatible = "mmio-sram";
+		reg = <0x20200000 DT_SIZE_K(768)>;
 	};
 
 	/* PSRAM linker region: sections may be placed here with Z_GENERIC_SECTION(PSRAM) once FlexSPI2 is up */
@@ -99,4 +106,15 @@
 		ahb-write-wait-unit = <2>;
 		ahb-write-wait-interval = <0>;
 	};
+};
+
+/* Covered by the combined sram node */
+&ocram {
+	compatible = "mmio-sram";
+	/delete-property/ zephyr,memory-region;
+};
+
+&ocram2 {
+	compatible = "mmio-sram";
+	/delete-property/ zephyr,memory-region;
 };

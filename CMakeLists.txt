@@ -28,7 +28,7 @@ if (FPRIME_PLATFORM STREQUAL "Zephyr")
     set_target_properties(Svc_FatalHandler PROPERTIES EXCLUDE_FROM_ALL TRUE)
     set_target_properties(fprime-zephyr_Drv_ZephyrSpiDriver PROPERTIES EXCLUDE_FROM_ALL TRUE)
     set_target_properties(Drv_TcpClient Drv_TcpServer PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    # fprime-stress runs on DoomCoprocessor; DoomFlight only uses its dictionary through the merged packet list
-    set_target_properties(Doom Doom_DoomEngine Doom_FrameDownsampler Doom_FrameTlmProcessor fprime_stress_doomgeneric
+    # The DOOM engine and downsampler run on DoomCoprocessor; DoomFlight builds only FrameTlmProcessor and the Doom types
+    set_target_properties(Doom_DoomEngine Doom_FrameDownsampler fprime_stress_doomgeneric
                           PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()

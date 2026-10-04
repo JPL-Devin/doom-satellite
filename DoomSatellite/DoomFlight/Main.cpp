@@ -7,6 +7,7 @@
 #include <DoomSatellite/DoomFlight/Top/DoomFlightTopology.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <Os/Os.hpp>
+#include <fprime-zephyr/Svc/ZephyrTouchReset/BootloaderEntry.hpp>
 
 // Zephyr headers follow F Prime headers: Zephyr's EMPTY macro collides with Os::Queue::Status::EMPTY
 #include <cmsis_core.h>
@@ -17,9 +18,6 @@
 #if defined(CONFIG_BOARD_TEENSY41)
 #include <zephyr/net/phy.h>
 #endif
-#if defined(CONFIG_RETENTION_BOOT_MODE)
-#include <zephyr/retention/bootmode.h>
-#endif
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/reboot.h>
 
@@ -27,7 +25,7 @@
 
 const struct device* serial = DEVICE_DT_GET(DT_NODELABEL(cdc_acm_uart0));
 
-//! Seconds the CDC ACM port is watched for a 1200 baud touch before the topology starts
+//! Seconds the CDC ACM port is watched for a touch reset before the topology starts
 static constexpr U32 BOOT_WINDOW_SECONDS = 10;
 static constexpr U32 CRASH_RECORD_MAGIC = 0xDEADD00Du;
 
@@ -47,18 +45,12 @@ struct CrashRecord {
 };
 static __noinit CrashRecord crashRecord;
 
-//! Enters the board bootloader when the host has set the CDC ACM port to 1200 baud
+//! Enters the board bootloader when the host has set the CDC ACM port to the board's touch baud rate
 static void touchResetCheck() {
     U32 baud = 0;
-    if ((uart_line_ctrl_get(serial, UART_LINE_CTRL_BAUD_RATE, &baud) == 0) && (baud == 1200)) {
-#if defined(CONFIG_RETENTION_BOOT_MODE)
-        (void)bootmode_set(BOOT_MODE_TYPE_BOOTLOADER);
-#endif
-#if defined(CONFIG_BOARD_TEENSY41)
-        // Teensy bootloader chip halts the core on this breakpoint and enters HalfKay
-        __asm__ volatile("bkpt #251");
-#endif
-        sys_reboot(SYS_REBOOT_WARM);
+    if ((uart_line_ctrl_get(serial, UART_LINE_CTRL_BAUD_RATE, &baud) == 0) &&
+        (baud == Zephyr::Bootloader::TOUCH_BAUD)) {
+        Zephyr::Bootloader::enter();
     }
 }
 
@@ -110,7 +102,7 @@ static void configureEthernetPhy() {
 }
 #endif
 
-//! Watches for the 1200 baud touch before the topology starts. After a fatal error, stays here reporting it.
+//! Watches for the touch reset before the topology starts. After a fatal error, stays here reporting it.
 static void bootWindow() {
     U32 resetCause = 0;
     (void)hwinfo_get_reset_cause(&resetCause);
@@ -136,7 +128,7 @@ static void bootWindow() {
 }
 
 //! Holds the asserting thread instead of rebooting so the assert message reaches the console and the
-//! 1200 baud touch can still reach the bootloader
+//! touch reset can still reach the bootloader
 class ParkingAssertHook : public Fw::AssertHook {
   public:
     void printAssert(const CHAR* msg) override { printk("%s\n", msg); }

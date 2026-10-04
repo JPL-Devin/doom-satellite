@@ -1,0 +1,19 @@
+register_fprime_library(
+    AUTOCODER_INPUTS
+        "${CMAKE_CURRENT_LIST_DIR}/FrameBufferAdapter.fpp"
+    SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/FrameBufferAdapter.cpp"
+    HEADERS
+        "${CMAKE_CURRENT_LIST_DIR}/FrameBufferAdapter.hpp"
+)
+
+register_fprime_ut(
+    AUTOCODER_INPUTS
+        "${CMAKE_CURRENT_LIST_DIR}/FrameBufferAdapter.fpp"
+    SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/test/ut/FrameBufferAdapterTester.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/test/ut/FrameBufferAdapterTestMain.cpp"
+    HEADERS
+        "${CMAKE_CURRENT_LIST_DIR}/test/ut/FrameBufferAdapterTester.hpp"
+    UT_AUTO_HELPERS
+)

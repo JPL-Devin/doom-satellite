@@ -20,8 +20,10 @@ Fw::MallocAllocator mallocator;
 
 enum TopologyConstants {
     HUB_BUFFER_MANAGER_ID = 300,
-    HUB_BUFFER_SIZE = 1024,
-    HUB_BUFFER_COUNT = 16,
+    HUB_SMALL_BUFFER_SIZE = 1024,  // Commands, events, telemetry and packed palettes
+    HUB_SMALL_BUFFER_COUNT = 16,
+    HUB_LARGE_BUFFER_SIZE = 4096,  // UDP receive buffers and packed frames (4,009 bytes, 4,025 with the hub header)
+    HUB_LARGE_BUFFER_COUNT = 32,
     HUB_RECV_PRIORITY = 30,
     HUB_RECONNECT_PRIORITY = 29,
 };
@@ -41,12 +43,14 @@ void configureTopology(const DoomCoprocessor::TopologyState& state) {
 
     Svc::BufferManager::BufferBins hubBins;
     memset(&hubBins, 0, sizeof(hubBins));
-    hubBins.bins[0].bufferSize = HUB_BUFFER_SIZE;
-    hubBins.bins[0].numBuffers = HUB_BUFFER_COUNT;
+    hubBins.bins[0].bufferSize = HUB_SMALL_BUFFER_SIZE;
+    hubBins.bins[0].numBuffers = HUB_SMALL_BUFFER_COUNT;
+    hubBins.bins[1].bufferSize = HUB_LARGE_BUFFER_SIZE;
+    hubBins.bins[1].numBuffers = HUB_LARGE_BUFFER_COUNT;
     hubBufferManager.setup(HUB_BUFFER_MANAGER_ID, 0, mallocator, hubBins);
 
     (void)hubComDriver.configureSend(state.hubRemoteAddress, state.hubRemotePort);
-    (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort);
+    (void)hubComDriver.configureRecv("0.0.0.0", state.hubLocalPort, HUB_LARGE_BUFFER_SIZE);
 
     // All engine heap allocation happens here, before any task runs. An unreadable WAD leaves the engine uncreated
     // and doom.Start is rejected.

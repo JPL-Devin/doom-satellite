@@ -68,6 +68,14 @@ module DoomFlight {
 
   instance cmdSplitter: Svc.CmdSplitter base id 0x1001B000
 
-  instance tlmSplitter: Components.TlmSplitter base id 0x1001C000
+  @ Repeats each packed frame and palette from the hub: one copy is echoed to DoomCoprocessor, one goes to frameAdapter
+  instance frameRepeater: Svc.BufferRepeater base id 0x1001C000
+
+  @ Unpacks frames and palettes received from DoomCoprocessor for frameTlmProcessor
+  instance frameAdapter: Components.FrameBufferAdapter base id 0x1001D000
+
+  @ Converts frames and palettes from DoomCoprocessor into row and palette telemetry. Keeps the DoomSubtopology base
+  @ id, so channel ids match a DoomSubtopology deployment.
+  instance frameTlmProcessor: Doom.FrameTlmProcessor base id DoomSubtopologyConfig.BASE_ID + 0x03000
 
 }

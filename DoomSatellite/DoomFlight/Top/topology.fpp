@@ -9,8 +9,14 @@ module DoomFlight {
     rateGroup1Hz
   }
 
-  @ Hub serial port carrying the echo of the remote telemetry stream (DoomCoprocessor tlmEcho.serialIn)
-  constant HUB_TLM_ECHO_PORT = 0
+  @ Hub buffer port carrying packed downsampled frames and palettes from DoomCoprocessor, and their echo back
+  constant HUB_FRAME_PORT = 0
+
+  @ Repeater outputs
+  enum Ports_FrameRepeater {
+    ECHO   @< Echo to DoomCoprocessor
+    LOCAL  @< Local frame telemetry
+  }
 
   deployment topology DoomFlight {
 
@@ -32,7 +38,9 @@ module DoomFlight {
     instance nullPrmDb
     instance touchReset
     instance cmdSplitter
-    instance tlmSplitter
+    instance frameRepeater
+    instance frameAdapter
+    instance frameTlmProcessor
     instance hub
     instance hubComDriver
     instance hubByteStreamAdapter
@@ -96,11 +104,28 @@ module DoomFlight {
     }
 
     connections HubTelemetry {
-      # Remote (DOOM) telemetry is split: one copy is packetized for the local downlink using the merged packet list
-      # (tools/merge_packets.py), the other is echoed back to DoomCoprocessor on hub serial port HUB_TLM_ECHO_PORT
-      hub.tlmOut                -> tlmSplitter.tlmIn
-      tlmSplitter.tlmOut        -> CdhCore.tlmSend.TlmRecv
-      tlmSplitter.echoOut       -> hub.serialIn[HUB_TLM_ECHO_PORT]
+      # Remote (DOOM) telemetry is packetized for the local downlink using the merged packet list
+      # (tools/merge_packets.py)
+      hub.tlmOut -> CdhCore.tlmSend.TlmRecv
+    }
+
+    connections HubFrames {
+      # The repeater copies each packed frame or palette from the hub, returns the original to the hub, and sends one
+      # copy back to DoomCoprocessor and one to frameAdapter. The echo copy is relayed by frameAdapter because the hub
+      # returns each bufferIn buffer to the instance that sent it, and the copy must go back to hubBufferManager.
+      hub.bufferOut[HUB_FRAME_PORT]                    -> frameRepeater.portIn
+      frameRepeater.deallocate                         -> hub.bufferOutReturn[HUB_FRAME_PORT]
+      frameRepeater.allocate                           -> hubBufferManager.bufferGetCallee
+      frameRepeater.portOut[Ports_FrameRepeater.ECHO]  -> frameAdapter.echoIn
+      frameAdapter.echoOut                             -> hub.bufferIn[HUB_FRAME_PORT]
+      hub.bufferInReturn[HUB_FRAME_PORT]               -> frameAdapter.echoOutReturn
+      frameAdapter.echoReturn                          -> hubBufferManager.bufferSendIn
+      frameRepeater.portOut[Ports_FrameRepeater.LOCAL] -> frameAdapter.packedIn
+      frameAdapter.packedInReturn                      -> hubBufferManager.bufferSendIn
+
+      # Unpacked frames and palettes to frame telemetry
+      frameAdapter.frameOut   -> frameTlmProcessor.frameIn
+      frameAdapter.paletteOut -> frameTlmProcessor.paletteIn
     }
 
     connections Hub {
@@ -130,7 +155,6 @@ module DoomFlight {
       # High rate (10Hz) rate group
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup10Hz] -> rateGroup10Hz.CycleIn
       rateGroup10Hz.RateGroupMemberOut[0] -> comDriver.schedIn
-      rateGroup10Hz.RateGroupMemberOut[1] -> touchReset.run
 
       # Slow rate (1Hz) rate group
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1Hz] -> rateGroup1Hz.CycleIn

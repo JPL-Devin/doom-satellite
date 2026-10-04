@@ -8,7 +8,7 @@
 [submodule "lib/fprime-zephyr"]
 	path = lib/fprime-zephyr
 	url = https://github.com/JPL-Devin/fprime-zephyr.git
-	branch = devin/1790989263-zephyr-touch-reset
+	branch = devin/1790995930-touch-reset-generalize
 [submodule "lib/fprime-stress"]
 	path = lib/fprime-stress
 	url = https://github.com/LeStarch/fprime-stress.git

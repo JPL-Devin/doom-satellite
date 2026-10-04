@@ -62,6 +62,7 @@ module DoomCoprocessor {
 
   instance linuxTimer: Svc.LinuxTimer base id 0x20009000
 
-  instance tlmEcho: Components.TlmEchoReceiver base id 0x2000A000
+  @ Packs downsampled frames and palettes for the hub; unpacks the copies DoomFlight echoes back
+  instance frameAdapter: Components.FrameBufferAdapter base id 0x2000A000
 
 }

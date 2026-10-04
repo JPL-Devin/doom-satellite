@@ -9,10 +9,10 @@ namespace DoomFlight {
 namespace DoomSatelliteMergedPackets {
 
 //! Number of packets in the merged packet list
-constexpr FwChanIdType NUM_PACKETS = 56;
+constexpr FwChanIdType NUM_PACKETS = 58;
 
 //! Number of distinct channels in the merged packet list
-constexpr FwChanIdType NUM_CHANNELS = 86;
+constexpr FwChanIdType NUM_CHANNELS = 98;
 
 //! Merged DoomFlight and DoomCoprocessor packet list
 extern const Svc::TlmPacketizerPacketList packetList;

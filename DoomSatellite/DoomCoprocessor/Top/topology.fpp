@@ -9,15 +9,17 @@ module DoomCoprocessor {
     rateGroup1Hz
   }
 
-  @ Hub serial port carrying DoomFlight's echo of the DOOM telemetry stream (DoomFlight tlmSplitter.echoOut)
-  constant HUB_TLM_ECHO_PORT = 0
+  @ Hub buffer port carrying packed downsampled frames and palettes to DoomFlight, and DoomFlight's echo of them back
+  constant HUB_FRAME_PORT = 0
 
   deployment topology DoomCoprocessor {
 
   # ----------------------------------------------------------------------
-  # Subtopology instances
+  # DoomSubtopology instances: the engine and downsampler run here, FrameTlmProcessor runs on DoomFlight
   # ----------------------------------------------------------------------
-    instance DoomSubtopology.Subtopology
+    instance DoomSubtopology.doom
+    instance DoomSubtopology.doomBufferManager
+    instance DoomSubtopology.frameDownsampler
 
   # ----------------------------------------------------------------------
   # Instances used in the topology
@@ -32,7 +34,7 @@ module DoomCoprocessor {
     instance rateGroup1Hz
     instance rateGroupDriver
     instance linuxTimer
-    instance tlmEcho
+    instance frameAdapter
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers
@@ -46,18 +48,17 @@ module DoomCoprocessor {
       cmdDisp
       rateGroupDoom
       rateGroup1Hz
-      tlmEcho
+      frameAdapter
       DoomSubtopology.doom
       DoomSubtopology.doomBufferManager
       DoomSubtopology.frameDownsampler
-      DoomSubtopology.frameTlmProcessor
     }
 
-    # Only the DOOM engine and frame telemetry cross the hub: DoomFlight packetizes this stream with the merged
-    # packet list (tools/merge_packets.py) and echoes it back to tlmEcho
+    # Only the DOOM engine and frame adapter telemetry cross the hub: DoomFlight packetizes it with the merged
+    # packet list (tools/merge_packets.py)
     telemetry connections instance hub {
       DoomSubtopology.doom
-      DoomSubtopology.frameTlmProcessor
+      frameAdapter
     }
 
     time connections instance chronoTime
@@ -76,11 +77,10 @@ module DoomCoprocessor {
       linuxTimer.CycleOut -> rateGroupDriver.CycleIn
 
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroupDoom] -> rateGroupDoom.CycleIn
-      rateGroupDoom.RateGroupMemberOut[0] -> DoomSubtopology.Subtopology.schedIn
+      rateGroupDoom.RateGroupMemberOut[0] -> DoomSubtopology.doom.schedIn
 
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1Hz] -> rateGroup1Hz.CycleIn
-      rateGroup1Hz.RateGroupMemberOut[0] -> DoomSubtopology.Subtopology.bufferManagerSchedIn
-      rateGroup1Hz.RateGroupMemberOut[1] -> tlmEcho.schedIn
+      rateGroup1Hz.RateGroupMemberOut[0] -> DoomSubtopology.doomBufferManager.schedIn
     }
 
     connections HubCommands {
@@ -88,8 +88,21 @@ module DoomCoprocessor {
       cmdDisp.seqCmdStatus -> hub.cmdRespIn
     }
 
-    connections HubTelemetryEcho {
-      hub.serialOut[HUB_TLM_ECHO_PORT] -> tlmEcho.serialIn
+    connections FramePipeline {
+      DoomSubtopology.doom.frameOut               -> DoomSubtopology.frameDownsampler.frameIn
+      DoomSubtopology.doom.paletteOut             -> DoomSubtopology.frameDownsampler.paletteIn
+      DoomSubtopology.frameDownsampler.frameOut   -> frameAdapter.frameIn
+      DoomSubtopology.frameDownsampler.paletteOut -> frameAdapter.paletteIn
+    }
+
+    connections HubFrames {
+      # Packed frames and palettes to DoomFlight. The hub copies each buffer and returns it before the call ends.
+      frameAdapter.packedOut             -> hub.bufferIn[HUB_FRAME_PORT]
+      hub.bufferInReturn[HUB_FRAME_PORT] -> frameAdapter.packedOutReturn
+
+      # DoomFlight's echo of each frame and palette, checked and counted by frameAdapter
+      hub.bufferOut[HUB_FRAME_PORT]      -> frameAdapter.packedIn
+      frameAdapter.packedInReturn        -> hub.bufferOutReturn[HUB_FRAME_PORT]
     }
 
     connections Hub {

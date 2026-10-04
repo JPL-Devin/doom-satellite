@@ -67,6 +67,17 @@ constexpr Svc::TlmPacketizerChannelEntry VersionChannels[] = {
 static_assert(PACKET_HEADER_SIZE + 192 <= FW_COM_BUFFER_MAX_SIZE, "Packet Version exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket Version = {VersionChannels, 0x4, 3, FW_NUM_ARRAY_ELEMENTS(VersionChannels)};
 
+// Packet FlightFrameAdapter: id 0x10, group 1, 20 data bytes
+constexpr Svc::TlmPacketizerChannelEntry FlightFrameAdapterChannels[] = {
+    {0x1001d000, 4},  // DoomFlight.frameAdapter.PackedRejected
+    {0x1001d002, 4},  // DoomFlight.frameAdapter.FramesUnpacked
+    {0x1001d003, 4},  // DoomFlight.frameAdapter.FramesRejected
+    {0x1001d005, 4},  // DoomFlight.frameAdapter.PalettesUnpacked
+    {0x1001d006, 4},  // DoomFlight.frameAdapter.PalettesRejected
+};
+static_assert(PACKET_HEADER_SIZE + 20 <= FW_COM_BUFFER_MAX_SIZE, "Packet FlightFrameAdapter exceeds FW_COM_BUFFER_MAX_SIZE");
+constexpr Svc::TlmPacketizerPacket FlightFrameAdapter = {FlightFrameAdapterChannels, 0x10, 1, FW_NUM_ARRAY_ELEMENTS(FlightFrameAdapterChannels)};
+
 // Packet DoomEngine: id 0x100, group 1, 37 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomEngineChannels[] = {
     {0x2d000052, 4},  // DoomSubtopology.doom.State
@@ -84,357 +95,370 @@ constexpr Svc::TlmPacketizerPacket DoomEngine = {DoomEngineChannels, 0x100, 1, F
 
 // Packet DoomPalette: id 0x101, group 1, 772 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomPaletteChannels[] = {
-    {0x2d003190, 772},  // DoomSubtopology.frameTlmProcessor.PaletteOut
+    {0x2d003190, 772},  // DoomFlight.frameTlmProcessor.PaletteOut
 };
 static_assert(PACKET_HEADER_SIZE + 772 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomPalette exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomPalette = {DoomPaletteChannels, 0x101, 1, FW_NUM_ARRAY_ELEMENTS(DoomPaletteChannels)};
 
+// Packet CoprocessorFrameAdapter: id 0x102, group 1, 28 data bytes
+constexpr Svc::TlmPacketizerChannelEntry CoprocessorFrameAdapterChannels[] = {
+    {0x2000a000, 4},  // DoomCoprocessor.frameAdapter.PackedRejected
+    {0x2000a001, 4},  // DoomCoprocessor.frameAdapter.FramesPacked
+    {0x2000a002, 4},  // DoomCoprocessor.frameAdapter.FramesUnpacked
+    {0x2000a003, 4},  // DoomCoprocessor.frameAdapter.FramesRejected
+    {0x2000a004, 4},  // DoomCoprocessor.frameAdapter.PalettesPacked
+    {0x2000a005, 4},  // DoomCoprocessor.frameAdapter.PalettesUnpacked
+    {0x2000a006, 4},  // DoomCoprocessor.frameAdapter.PalettesRejected
+};
+static_assert(PACKET_HEADER_SIZE + 28 <= FW_COM_BUFFER_MAX_SIZE, "Packet CoprocessorFrameAdapter exceeds FW_COM_BUFFER_MAX_SIZE");
+constexpr Svc::TlmPacketizerPacket CoprocessorFrameAdapter = {CoprocessorFrameAdapterChannels, 0x102, 1, FW_NUM_ARRAY_ELEMENTS(CoprocessorFrameAdapterChannels)};
+
 // Packet DoomFrameRow000: id 0x200, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow000Channels[] = {
-    {0x2d003000, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow000
+    {0x2d003000, 88},  // DoomFlight.frameTlmProcessor.FrameRow000
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow000 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow000 = {DoomFrameRow000Channels, 0x200, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow000Channels)};
 
 // Packet DoomFrameRow001: id 0x201, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow001Channels[] = {
-    {0x2d003001, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow001
+    {0x2d003001, 88},  // DoomFlight.frameTlmProcessor.FrameRow001
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow001 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow001 = {DoomFrameRow001Channels, 0x201, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow001Channels)};
 
 // Packet DoomFrameRow002: id 0x202, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow002Channels[] = {
-    {0x2d003002, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow002
+    {0x2d003002, 88},  // DoomFlight.frameTlmProcessor.FrameRow002
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow002 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow002 = {DoomFrameRow002Channels, 0x202, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow002Channels)};
 
 // Packet DoomFrameRow003: id 0x203, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow003Channels[] = {
-    {0x2d003003, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow003
+    {0x2d003003, 88},  // DoomFlight.frameTlmProcessor.FrameRow003
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow003 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow003 = {DoomFrameRow003Channels, 0x203, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow003Channels)};
 
 // Packet DoomFrameRow004: id 0x204, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow004Channels[] = {
-    {0x2d003004, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow004
+    {0x2d003004, 88},  // DoomFlight.frameTlmProcessor.FrameRow004
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow004 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow004 = {DoomFrameRow004Channels, 0x204, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow004Channels)};
 
 // Packet DoomFrameRow005: id 0x205, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow005Channels[] = {
-    {0x2d003005, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow005
+    {0x2d003005, 88},  // DoomFlight.frameTlmProcessor.FrameRow005
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow005 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow005 = {DoomFrameRow005Channels, 0x205, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow005Channels)};
 
 // Packet DoomFrameRow006: id 0x206, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow006Channels[] = {
-    {0x2d003006, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow006
+    {0x2d003006, 88},  // DoomFlight.frameTlmProcessor.FrameRow006
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow006 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow006 = {DoomFrameRow006Channels, 0x206, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow006Channels)};
 
 // Packet DoomFrameRow007: id 0x207, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow007Channels[] = {
-    {0x2d003007, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow007
+    {0x2d003007, 88},  // DoomFlight.frameTlmProcessor.FrameRow007
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow007 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow007 = {DoomFrameRow007Channels, 0x207, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow007Channels)};
 
 // Packet DoomFrameRow008: id 0x208, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow008Channels[] = {
-    {0x2d003008, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow008
+    {0x2d003008, 88},  // DoomFlight.frameTlmProcessor.FrameRow008
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow008 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow008 = {DoomFrameRow008Channels, 0x208, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow008Channels)};
 
 // Packet DoomFrameRow009: id 0x209, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow009Channels[] = {
-    {0x2d003009, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow009
+    {0x2d003009, 88},  // DoomFlight.frameTlmProcessor.FrameRow009
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow009 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow009 = {DoomFrameRow009Channels, 0x209, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow009Channels)};
 
 // Packet DoomFrameRow010: id 0x20a, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow010Channels[] = {
-    {0x2d00300a, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow010
+    {0x2d00300a, 88},  // DoomFlight.frameTlmProcessor.FrameRow010
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow010 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow010 = {DoomFrameRow010Channels, 0x20a, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow010Channels)};
 
 // Packet DoomFrameRow011: id 0x20b, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow011Channels[] = {
-    {0x2d00300b, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow011
+    {0x2d00300b, 88},  // DoomFlight.frameTlmProcessor.FrameRow011
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow011 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow011 = {DoomFrameRow011Channels, 0x20b, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow011Channels)};
 
 // Packet DoomFrameRow012: id 0x20c, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow012Channels[] = {
-    {0x2d00300c, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow012
+    {0x2d00300c, 88},  // DoomFlight.frameTlmProcessor.FrameRow012
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow012 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow012 = {DoomFrameRow012Channels, 0x20c, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow012Channels)};
 
 // Packet DoomFrameRow013: id 0x20d, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow013Channels[] = {
-    {0x2d00300d, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow013
+    {0x2d00300d, 88},  // DoomFlight.frameTlmProcessor.FrameRow013
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow013 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow013 = {DoomFrameRow013Channels, 0x20d, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow013Channels)};
 
 // Packet DoomFrameRow014: id 0x20e, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow014Channels[] = {
-    {0x2d00300e, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow014
+    {0x2d00300e, 88},  // DoomFlight.frameTlmProcessor.FrameRow014
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow014 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow014 = {DoomFrameRow014Channels, 0x20e, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow014Channels)};
 
 // Packet DoomFrameRow015: id 0x20f, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow015Channels[] = {
-    {0x2d00300f, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow015
+    {0x2d00300f, 88},  // DoomFlight.frameTlmProcessor.FrameRow015
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow015 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow015 = {DoomFrameRow015Channels, 0x20f, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow015Channels)};
 
 // Packet DoomFrameRow016: id 0x210, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow016Channels[] = {
-    {0x2d003010, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow016
+    {0x2d003010, 88},  // DoomFlight.frameTlmProcessor.FrameRow016
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow016 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow016 = {DoomFrameRow016Channels, 0x210, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow016Channels)};
 
 // Packet DoomFrameRow017: id 0x211, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow017Channels[] = {
-    {0x2d003011, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow017
+    {0x2d003011, 88},  // DoomFlight.frameTlmProcessor.FrameRow017
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow017 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow017 = {DoomFrameRow017Channels, 0x211, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow017Channels)};
 
 // Packet DoomFrameRow018: id 0x212, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow018Channels[] = {
-    {0x2d003012, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow018
+    {0x2d003012, 88},  // DoomFlight.frameTlmProcessor.FrameRow018
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow018 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow018 = {DoomFrameRow018Channels, 0x212, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow018Channels)};
 
 // Packet DoomFrameRow019: id 0x213, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow019Channels[] = {
-    {0x2d003013, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow019
+    {0x2d003013, 88},  // DoomFlight.frameTlmProcessor.FrameRow019
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow019 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow019 = {DoomFrameRow019Channels, 0x213, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow019Channels)};
 
 // Packet DoomFrameRow020: id 0x214, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow020Channels[] = {
-    {0x2d003014, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow020
+    {0x2d003014, 88},  // DoomFlight.frameTlmProcessor.FrameRow020
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow020 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow020 = {DoomFrameRow020Channels, 0x214, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow020Channels)};
 
 // Packet DoomFrameRow021: id 0x215, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow021Channels[] = {
-    {0x2d003015, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow021
+    {0x2d003015, 88},  // DoomFlight.frameTlmProcessor.FrameRow021
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow021 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow021 = {DoomFrameRow021Channels, 0x215, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow021Channels)};
 
 // Packet DoomFrameRow022: id 0x216, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow022Channels[] = {
-    {0x2d003016, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow022
+    {0x2d003016, 88},  // DoomFlight.frameTlmProcessor.FrameRow022
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow022 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow022 = {DoomFrameRow022Channels, 0x216, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow022Channels)};
 
 // Packet DoomFrameRow023: id 0x217, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow023Channels[] = {
-    {0x2d003017, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow023
+    {0x2d003017, 88},  // DoomFlight.frameTlmProcessor.FrameRow023
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow023 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow023 = {DoomFrameRow023Channels, 0x217, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow023Channels)};
 
 // Packet DoomFrameRow024: id 0x218, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow024Channels[] = {
-    {0x2d003018, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow024
+    {0x2d003018, 88},  // DoomFlight.frameTlmProcessor.FrameRow024
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow024 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow024 = {DoomFrameRow024Channels, 0x218, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow024Channels)};
 
 // Packet DoomFrameRow025: id 0x219, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow025Channels[] = {
-    {0x2d003019, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow025
+    {0x2d003019, 88},  // DoomFlight.frameTlmProcessor.FrameRow025
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow025 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow025 = {DoomFrameRow025Channels, 0x219, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow025Channels)};
 
 // Packet DoomFrameRow026: id 0x21a, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow026Channels[] = {
-    {0x2d00301a, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow026
+    {0x2d00301a, 88},  // DoomFlight.frameTlmProcessor.FrameRow026
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow026 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow026 = {DoomFrameRow026Channels, 0x21a, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow026Channels)};
 
 // Packet DoomFrameRow027: id 0x21b, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow027Channels[] = {
-    {0x2d00301b, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow027
+    {0x2d00301b, 88},  // DoomFlight.frameTlmProcessor.FrameRow027
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow027 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow027 = {DoomFrameRow027Channels, 0x21b, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow027Channels)};
 
 // Packet DoomFrameRow028: id 0x21c, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow028Channels[] = {
-    {0x2d00301c, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow028
+    {0x2d00301c, 88},  // DoomFlight.frameTlmProcessor.FrameRow028
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow028 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow028 = {DoomFrameRow028Channels, 0x21c, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow028Channels)};
 
 // Packet DoomFrameRow029: id 0x21d, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow029Channels[] = {
-    {0x2d00301d, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow029
+    {0x2d00301d, 88},  // DoomFlight.frameTlmProcessor.FrameRow029
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow029 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow029 = {DoomFrameRow029Channels, 0x21d, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow029Channels)};
 
 // Packet DoomFrameRow030: id 0x21e, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow030Channels[] = {
-    {0x2d00301e, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow030
+    {0x2d00301e, 88},  // DoomFlight.frameTlmProcessor.FrameRow030
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow030 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow030 = {DoomFrameRow030Channels, 0x21e, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow030Channels)};
 
 // Packet DoomFrameRow031: id 0x21f, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow031Channels[] = {
-    {0x2d00301f, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow031
+    {0x2d00301f, 88},  // DoomFlight.frameTlmProcessor.FrameRow031
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow031 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow031 = {DoomFrameRow031Channels, 0x21f, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow031Channels)};
 
 // Packet DoomFrameRow032: id 0x220, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow032Channels[] = {
-    {0x2d003020, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow032
+    {0x2d003020, 88},  // DoomFlight.frameTlmProcessor.FrameRow032
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow032 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow032 = {DoomFrameRow032Channels, 0x220, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow032Channels)};
 
 // Packet DoomFrameRow033: id 0x221, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow033Channels[] = {
-    {0x2d003021, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow033
+    {0x2d003021, 88},  // DoomFlight.frameTlmProcessor.FrameRow033
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow033 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow033 = {DoomFrameRow033Channels, 0x221, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow033Channels)};
 
 // Packet DoomFrameRow034: id 0x222, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow034Channels[] = {
-    {0x2d003022, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow034
+    {0x2d003022, 88},  // DoomFlight.frameTlmProcessor.FrameRow034
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow034 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow034 = {DoomFrameRow034Channels, 0x222, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow034Channels)};
 
 // Packet DoomFrameRow035: id 0x223, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow035Channels[] = {
-    {0x2d003023, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow035
+    {0x2d003023, 88},  // DoomFlight.frameTlmProcessor.FrameRow035
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow035 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow035 = {DoomFrameRow035Channels, 0x223, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow035Channels)};
 
 // Packet DoomFrameRow036: id 0x224, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow036Channels[] = {
-    {0x2d003024, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow036
+    {0x2d003024, 88},  // DoomFlight.frameTlmProcessor.FrameRow036
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow036 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow036 = {DoomFrameRow036Channels, 0x224, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow036Channels)};
 
 // Packet DoomFrameRow037: id 0x225, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow037Channels[] = {
-    {0x2d003025, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow037
+    {0x2d003025, 88},  // DoomFlight.frameTlmProcessor.FrameRow037
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow037 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow037 = {DoomFrameRow037Channels, 0x225, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow037Channels)};
 
 // Packet DoomFrameRow038: id 0x226, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow038Channels[] = {
-    {0x2d003026, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow038
+    {0x2d003026, 88},  // DoomFlight.frameTlmProcessor.FrameRow038
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow038 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow038 = {DoomFrameRow038Channels, 0x226, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow038Channels)};
 
 // Packet DoomFrameRow039: id 0x227, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow039Channels[] = {
-    {0x2d003027, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow039
+    {0x2d003027, 88},  // DoomFlight.frameTlmProcessor.FrameRow039
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow039 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow039 = {DoomFrameRow039Channels, 0x227, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow039Channels)};
 
 // Packet DoomFrameRow040: id 0x228, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow040Channels[] = {
-    {0x2d003028, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow040
+    {0x2d003028, 88},  // DoomFlight.frameTlmProcessor.FrameRow040
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow040 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow040 = {DoomFrameRow040Channels, 0x228, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow040Channels)};
 
 // Packet DoomFrameRow041: id 0x229, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow041Channels[] = {
-    {0x2d003029, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow041
+    {0x2d003029, 88},  // DoomFlight.frameTlmProcessor.FrameRow041
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow041 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow041 = {DoomFrameRow041Channels, 0x229, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow041Channels)};
 
 // Packet DoomFrameRow042: id 0x22a, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow042Channels[] = {
-    {0x2d00302a, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow042
+    {0x2d00302a, 88},  // DoomFlight.frameTlmProcessor.FrameRow042
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow042 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow042 = {DoomFrameRow042Channels, 0x22a, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow042Channels)};
 
 // Packet DoomFrameRow043: id 0x22b, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow043Channels[] = {
-    {0x2d00302b, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow043
+    {0x2d00302b, 88},  // DoomFlight.frameTlmProcessor.FrameRow043
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow043 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow043 = {DoomFrameRow043Channels, 0x22b, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow043Channels)};
 
 // Packet DoomFrameRow044: id 0x22c, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow044Channels[] = {
-    {0x2d00302c, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow044
+    {0x2d00302c, 88},  // DoomFlight.frameTlmProcessor.FrameRow044
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow044 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow044 = {DoomFrameRow044Channels, 0x22c, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow044Channels)};
 
 // Packet DoomFrameRow045: id 0x22d, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow045Channels[] = {
-    {0x2d00302d, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow045
+    {0x2d00302d, 88},  // DoomFlight.frameTlmProcessor.FrameRow045
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow045 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow045 = {DoomFrameRow045Channels, 0x22d, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow045Channels)};
 
 // Packet DoomFrameRow046: id 0x22e, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow046Channels[] = {
-    {0x2d00302e, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow046
+    {0x2d00302e, 88},  // DoomFlight.frameTlmProcessor.FrameRow046
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow046 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow046 = {DoomFrameRow046Channels, 0x22e, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow046Channels)};
 
 // Packet DoomFrameRow047: id 0x22f, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow047Channels[] = {
-    {0x2d00302f, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow047
+    {0x2d00302f, 88},  // DoomFlight.frameTlmProcessor.FrameRow047
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow047 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow047 = {DoomFrameRow047Channels, 0x22f, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow047Channels)};
 
 // Packet DoomFrameRow048: id 0x230, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow048Channels[] = {
-    {0x2d003030, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow048
+    {0x2d003030, 88},  // DoomFlight.frameTlmProcessor.FrameRow048
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow048 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow048 = {DoomFrameRow048Channels, 0x230, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow048Channels)};
 
 // Packet DoomFrameRow049: id 0x231, group 1, 88 data bytes
 constexpr Svc::TlmPacketizerChannelEntry DoomFrameRow049Channels[] = {
-    {0x2d003031, 88},  // DoomSubtopology.frameTlmProcessor.FrameRow049
+    {0x2d003031, 88},  // DoomFlight.frameTlmProcessor.FrameRow049
 };
 static_assert(PACKET_HEADER_SIZE + 88 <= FW_COM_BUFFER_MAX_SIZE, "Packet DoomFrameRow049 exceeds FW_COM_BUFFER_MAX_SIZE");
 constexpr Svc::TlmPacketizerPacket DoomFrameRow049 = {DoomFrameRow049Channels, 0x231, 1, FW_NUM_ARRAY_ELEMENTS(DoomFrameRow049Channels)};
@@ -447,8 +471,10 @@ const Svc::TlmPacketizerPacketList packetList = {
         &HealthWarnings,
         &HealthAuxillary,
         &Version,
+        &FlightFrameAdapter,
         &DoomEngine,
         &DoomPalette,
+        &CoprocessorFrameAdapter,
         &DoomFrameRow000,
         &DoomFrameRow001,
         &DoomFrameRow002,
