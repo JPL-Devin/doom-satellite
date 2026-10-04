@@ -34,9 +34,9 @@ memoryview of the caller's storage; the handler sums it for the mean index and, 
 it through a 256-byte palette-index-to-brightness table (BT.601 luma) for the mean brightness. Both are C-speed
 operations on the memoryview so the handler stays well inside the 35 Hz frame period.
 
-`paletteIn` rebuilds the brightness table from the 256 RGB triples of `Doom.Palette`. fprime-python does not bind
-struct members that are inline arrays (`rgb: [768] U8`), so `DoomCoprocessorBindings.cpp` extends the generated
-`Doom.Palette` Python type with `get_rgb()`, returning the packed R,G,B bytes.
+`paletteIn` rebuilds the brightness table from the 256 RGB triples of `Doom.Palette`, read through the generated
+`get_rgb()` (fprime-python binds the inlined-array member `rgb: [768] U8` by value as a list of the packed R,G,B
+values).
 
 ### 3.3 Events
 

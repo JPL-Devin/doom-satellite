@@ -5,7 +5,6 @@
 #include <csignal>
 #include <string>
 
-#include "Doom/PaletteSerializableAc.hpp"
 #include "DoomSatellite/DoomCoprocessor/Top/DoomCoprocessorTopology.hpp"
 #include "DoomSatellite/DoomCoprocessor/Top/DoomCoprocessorTopologyDefs.hpp"
 #include "FprimePython/FprimePython.hpp"
@@ -51,15 +50,6 @@ void setup_user_deployment(pybind11::module_& m) {
             "DOOM IWAD path; the engine is not created when it cannot be opened")
         .def_readwrite("autoStart", &DoomCoprocessor::TopologyState::autoStart,
                        "Start the DOOM engine at setup instead of waiting for doom.Start");
-
-    // fprime-python does not bind struct members that are inline arrays (Doom.Palette.rgb: [768] U8), so the palette
-    // contents are exposed to Python here as bytes; the generated Doom.Palette type already exists when this runs
-    pybind11::type palette = pybind11::type::of<Doom::Palette>();
-    palette.attr("get_rgb") = pybind11::cpp_function(
-        [](const Doom::Palette& self) {
-            return pybind11::bytes(reinterpret_cast<const char*>(self.get_rgb()), sizeof(Doom::Palette::Type_of_rgb));
-        },
-        pybind11::is_method(palette), "Palette contents as 768 bytes packed R0,G0,B0,R1,G1,B1,...");
 
     // The project lifecycle (DoomCoprocessorTopology.cpp): configures the hub, the DOOM engine and the timer in
     // addition to the autocoded phases
