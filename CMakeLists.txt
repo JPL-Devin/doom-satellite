@@ -19,6 +19,8 @@ project(doom-satellite C CXX)
 # fprime-python autocoder.
 set(DOOM_SATELLITE_SETTINGS_LIBRARY_LOCATIONS "${FPRIME_LIBRARY_LOCATIONS}")
 if (NOT CMAKE_TOOLCHAIN_FILE MATCHES "/zephyr\\.cmake$")
+    # fprime-zephyr only builds against the Zephyr kernel headers
+    list(FILTER FPRIME_LIBRARY_LOCATIONS EXCLUDE REGEX "/lib/fprime-zephyr$")
     list(APPEND FPRIME_LIBRARY_LOCATIONS "${CMAKE_CURRENT_LIST_DIR}/lib/fprime-python")
     list(REMOVE_DUPLICATES FPRIME_LIBRARY_LOCATIONS)
     set(FPRIME_ENABLE_JSON_MODEL_GENERATION ON)
